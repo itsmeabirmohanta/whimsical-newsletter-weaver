@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 interface EmailNewsletterTemplateProps {
   previewText?: string;
@@ -20,16 +21,28 @@ const EmailNewsletterTemplate: React.FC<EmailNewsletterTemplateProps> = ({
         <div dangerouslySetInnerHTML={{ __html: generateEmailHTML(previewText) }} />
       </div>
       
-      <div className="mt-6 flex justify-end">
-        <button 
-          className="bg-primary text-primary-foreground px-4 py-2 rounded hover:opacity-90 transition-opacity"
+      <div className="mt-6 flex justify-end gap-2">
+        <Button 
+          variant="outline"
+          onClick={() => {
+            // Copy to clipboard functionality
+            const emailHTML = generateEmailHTML(previewText);
+            navigator.clipboard.writeText(emailHTML)
+              .then(() => alert("HTML copied to clipboard!"))
+              .catch(err => console.error("Could not copy text: ", err));
+          }}
+        >
+          Copy HTML
+        </Button>
+        <Button 
+          variant="default"
           onClick={() => {
             // This would connect to your email service in a real implementation
             alert("In a real application, this would send the newsletter via your email service provider API");
           }}
         >
           Send Test Email
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -107,7 +120,7 @@ const generateEmailHTML = (previewText: string) => {
               </tr>
             </table>
             
-            <!-- Featured article -->
+            <!-- Featured article: AI and the 2024 Elections -->
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px; border-collapse: separate; border-spacing: 0; border-radius: 4px; overflow: hidden; border: 1px solid #eaeaea;">
               <tr>
                 <td>
@@ -129,7 +142,7 @@ const generateEmailHTML = (previewText: string) => {
                           Based on insights from the policy paper THE PERVASIVE INFLUENCE OF A.I ON GLOBAL POLITICAL CAMPAIGNS IN 2024, published by Future Shift Labs.
                         </p>
                         <p style="color: #444; font-size: 16px; line-height: 24px; margin: 0 0 20px 0;">
-                          The 2024 elections were a turning point for global democracy, with nearly 74 countries heading to the polls. AI played a more significant role than ever before, influencing everything from political campaigns to public perception.
+                          The 2024 elections were a turning point for global democracy, with nearly 74 countries heading to the polls. AI played a more significant role than ever before, influencing everything from political campaigns to public perception. While its use is still in the early stages, AI is already making waves—both positively and negatively—through targeted campaigning, deepfake content, and misinformation.
                         </p>
                         <h3 style="color: #333; font-size: 18px; margin: 20px 0 10px 0; font-weight: 600;">Key Takeaways</h3>
                         <ul style="color: #444; font-size: 16px; line-height: 24px; margin: 0 0 20px 0; padding-left: 20px;">
@@ -139,9 +152,45 @@ const generateEmailHTML = (previewText: string) => {
                           <li style="margin-bottom: 5px;">Russia leveraged AI for foreign influence and disinformation efforts.</li>
                           <li style="margin-bottom: 5px;">Legal frameworks struggled to keep pace with AI's rapid advancements.</li>
                         </ul>
-                        <a href="#" style="display: inline-block; color: #6366f1; font-weight: 500; text-decoration: none;">
-                          Continue reading →
-                        </a>
+                        
+                        <!-- AI Transparency section integrated with main article -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                          <tr>
+                            <td>
+                              <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0; font-weight: 600;">Why AI Transparency Matters</h3>
+                              <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0;">
+                                One of the biggest concerns surrounding AI in elections is the lack of transparency. AI-driven campaigns can personalize messages and target specific demographics, but without clear oversight, these tools risk being used to manipulate voters. Establishing transparency standards can ensure AI is used responsibly and does not erode trust in democratic processes.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; padding: 15px; background-color: #f0f0f5; border-radius: 4px;">
+                          <tr>
+                            <td>
+                              <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0; font-weight: 600;">The Need for Global AI Regulations</h3>
+                              <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0;">
+                                As AI increasingly influences elections worldwide, international cooperation is essential. Countries must work together to set guidelines on ethical AI use in politics, curb election interference, and develop safeguards against AI-driven disinformation campaigns. A unified global effort can help maintain fair and transparent elections in the digital age.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                          <tr>
+                            <td align="center">
+                              <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
+                                    <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
+                                      Continue reading →
+                                    </a>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
                       </td>
                     </tr>
                   </table>
@@ -149,83 +198,99 @@ const generateEmailHTML = (previewText: string) => {
               </tr>
             </table>
             
-            <!-- Article grid - two column layout -->
+            <!-- Op-Ed section title -->
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
               <tr>
                 <td style="padding-bottom: 15px;">
                   <h2 style="color: #333; font-size: 22px; margin: 0; font-weight: 600;">Latest Op-Eds</h2>
                 </td>
               </tr>
-              <!-- First row of articles -->
-              <tr>
-                <td>
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                    <tr valign="top">
-                      <!-- First article -->
-                      <td width="48%" style="padding: 0 2% 20px 0;">
-                        <a href="#" style="text-decoration: none; color: inherit;">
-                          <img src="https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80" alt="India's AI Boom" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
-                        </a>
-                        <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
-                          <a href="#" style="text-decoration: none; color: inherit;">India's AI Boom: A Moment of Opportunity and Challenge</a>
-                        </h3>
-                        <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Alisha Butala • 6 min read</p>
-                        <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
-                          As India advances in artificial intelligence, the country faces a dual challenge: harnessing AI for economic growth while protecting its workforce from exploitation.
-                        </p>
-                      </td>
-                      
-                      <!-- Second article -->
-                      <td width="48%" style="padding: 0 0 20px 2%;">
-                        <a href="#" style="text-decoration: none; color: inherit;">
-                          <img src="https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80" alt="EU's Bold Regulatory Stand" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
-                        </a>
-                        <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
-                          <a href="#" style="text-decoration: none; color: inherit;">AI's Double-Edged Sword: The EU's Bold Regulatory Stand</a>
-                        </h3>
-                        <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Parishrut Jassal • 5 min read</p>
-                        <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
-                          In an era when artificial intelligence is rewriting the rules of business, governance, and daily life, the European Union is boldly stepping in to ensure that technological innovation does not come at the expense of our fundamental rights.
+            </table>
+            
+            <!-- Op-Ed articles - two column layout -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr valign="top">
+                <!-- First article - India's AI Boom -->
+                <td width="48%" style="padding: 0 2% 20px 0;">
+                  <a href="#" style="text-decoration: none; color: inherit;">
+                    <img src="https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80" alt="India's AI Boom" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
+                  </a>
+                  <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
+                    <a href="#" style="text-decoration: none; color: inherit;">India's AI Boom: A Moment of Opportunity and Challenge</a>
+                  </h3>
+                  <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Alisha Butala • 6 min read</p>
+                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
+                    As India advances in artificial intelligence, the country faces a dual challenge: harnessing AI for economic growth while protecting its workforce from exploitation. Government initiatives like Digital India are driving technological innovation, but global tech giants are extracting vast amounts of data and leveraging India's low-cost labor without fair compensation.
+                  </p>
+                  
+                  <!-- Combating AI-Generated Misinformation integrated with first op-ed -->
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0; padding: 10px; background-color: #f0f0f5; border-radius: 4px;">
+                    <tr>
+                      <td>
+                        <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">Combating AI-Generated Misinformation</h4>
+                        <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
+                          The rise of AI-powered disinformation highlights the need for stronger media literacy, especially in rapidly developing markets like India. Misinformation spreads fast, and many voters may struggle to differentiate between real and AI-generated content.
                         </p>
                       </td>
                     </tr>
                   </table>
+                  
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
+                    <tr>
+                      <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
+                              <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
+                                Continue reading →
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
-              </tr>
-            </table>
-            
-            <!-- Why AI Transparency Matters section -->
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
-              <tr>
-                <td>
-                  <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0; font-weight: 600;">Why AI Transparency Matters</h3>
-                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0;">
-                    One of the biggest concerns surrounding AI in elections is the lack of transparency. AI-driven campaigns can personalize messages and target specific demographics, but without clear oversight, these tools risk being used to manipulate voters. Establishing transparency standards can ensure AI is used responsibly and does not erode trust in democratic processes.
+                
+                <!-- Second article - EU's Bold Regulatory Stand -->
+                <td width="48%" style="padding: 0 0 20px 2%;">
+                  <a href="#" style="text-decoration: none; color: inherit;">
+                    <img src="https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80" alt="EU's Bold Regulatory Stand" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
+                  </a>
+                  <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
+                    <a href="#" style="text-decoration: none; color: inherit;">AI's Double-Edged Sword: The EU's Bold Regulatory Stand</a>
+                  </h3>
+                  <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Parishrut Jassal • 5 min read</p>
+                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
+                    In an era when artificial intelligence is rewriting the rules of business, governance, and daily life, the European Union is boldly stepping in to ensure that technological innovation does not come at the expense of our fundamental rights. As AI systems revolutionize industries from healthcare to finance, they also raise serious concerns.
                   </p>
-                </td>
-              </tr>
-            </table>
-            
-            <!-- Combating AI-Generated Misinformation -->
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; padding: 15px; background-color: #f0f0f5; border-radius: 4px;">
-              <tr>
-                <td>
-                  <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0; font-weight: 600;">Combating AI-Generated Misinformation</h3>
-                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0;">
-                    The rise of AI-powered disinformation highlights the need for stronger media literacy. Misinformation spreads fast, and many voters may struggle to differentiate between real and AI-generated content. Educational initiatives and fact-checking programs can help people recognize deepfakes, false narratives, and AI-driven propaganda, strengthening resilience against digital deception.
-                  </p>
-                </td>
-              </tr>
-            </table>
-            
-            <!-- The Need for Global AI Regulations -->
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
-              <tr>
-                <td>
-                  <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0; font-weight: 600;">The Need for Global AI Regulations</h3>
-                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0;">
-                    As AI increasingly influences elections worldwide, international cooperation is essential. Countries must work together to set guidelines on ethical AI use in politics, curb election interference, and develop safeguards against AI-driven disinformation campaigns. A unified global effort can help maintain fair and transparent elections in the digital age.
-                  </p>
+                  
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                    <tr>
+                      <td>
+                        <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">The Global Kaleidoscope</h4>
+                        <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
+                          According to a Reuters report, the new guidelines also cover the misuse of AI by employers, websites, and law enforcement. For instance, employers are now banned from using AI to monitor employees' emotions via webcams or voice recognition systems.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
+                    <tr>
+                      <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
+                              <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
+                                Continue reading →
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
