@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightCircle, Mail, Bell } from 'lucide-react';
+import { ArrowRightCircle, Mail, Bell, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubscribeModal from './SubscribeModal';
+import { Link } from 'react-router-dom';
 
 const NewsletterHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,6 +34,17 @@ const NewsletterHeader = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <Link to="/email-template">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:flex items-center gap-2 hover:bg-secondary"
+              >
+                <FileText size={16} />
+                <span>Email Template</span>
+              </Button>
+            </Link>
+            
             <Button 
               variant="ghost" 
               size="sm" 
