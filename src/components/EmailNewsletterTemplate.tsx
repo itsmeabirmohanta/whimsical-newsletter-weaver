@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight } from 'lucide-react';
 
 interface EmailNewsletterTemplateProps {
   previewText?: string;
@@ -10,16 +13,33 @@ const EmailNewsletterTemplate: React.FC<EmailNewsletterTemplateProps> = ({
   previewText = "Future Shift Labs Monthly Digest - Envisioning the Future",
 }) => {
   return (
-    <div className="p-8 max-w-3xl mx-auto bg-white rounded-lg shadow-md">
+    <div className="p-8 max-w-4xl mx-auto bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-medium mb-6">Email Newsletter Preview</h2>
       <p className="text-sm text-muted-foreground mb-4">
         Below is how your newsletter will appear in email clients. The actual email will use inline styles instead of Tailwind classes for maximum compatibility.
       </p>
       
-      <div className="border border-border rounded-md p-4 overflow-auto max-h-[600px]">
-        {/* This is the email preview that shows what will be sent */}
-        <div dangerouslySetInnerHTML={{ __html: generateEmailHTML(previewText) }} />
-      </div>
+      <Tabs defaultValue="preview" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="html">HTML Code</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="preview" className="border border-border rounded-md p-4 overflow-auto max-h-[600px]">
+          {/* This is the email preview that shows what will be sent */}
+          <div dangerouslySetInnerHTML={{ __html: generateEmailHTML(previewText) }} />
+        </TabsContent>
+        
+        <TabsContent value="html">
+          <Card>
+            <CardContent className="p-4">
+              <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[400px] text-xs">
+                {generateEmailHTML(previewText)}
+              </pre>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       
       <div className="mt-6 flex justify-end gap-2">
         <Button 
@@ -70,6 +90,29 @@ const generateEmailHTML = (previewText: string) => {
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Future Shift Labs Monthly Digest</title>
+      <style type="text/css">
+        /* Base styles */
+        body, table, td, p, a, li, blockquote {
+          -webkit-text-size-adjust: 100%;
+          -ms-text-size-adjust: 100%;
+        }
+        /* Prevent WebKit and Windows mobile from changing default text sizes */
+        table, td {
+          mso-table-lspace: 0pt;
+          mso-table-rspace: 0pt;
+        }
+        /* Remove spacing between tables */
+        img {
+          -ms-interpolation-mode: bicubic;
+          border: 0;
+        }
+        /* Allow smoother rendering of resized images */
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        /* Reset margins and padding */
+      </style>
     </head>
     <body style="margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; background-color: #f8f9fa; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
       <!-- Preheader text that appears in email clients -->
@@ -198,52 +241,99 @@ const generateEmailHTML = (previewText: string) => {
               </tr>
             </table>
             
+            <!-- Global Elections & AI Tracker Section -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px; background-color: #f0f5ff; border-radius: 8px; overflow: hidden;">
+              <tr>
+                <td style="padding: 0;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td valign="middle" width="50%" style="padding: 20px;">
+                        <img src="/lovable-uploads/255a2735-5d6f-412d-b5f1-a95b69886e73.png" alt="Global Elections & AI Tracker" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" />
+                      </td>
+                      <td valign="middle" width="50%" style="padding: 20px;">
+                        <h2 style="color: #111827; font-size: 28px; font-weight: 700; margin: 0 0 15px 0; line-height: 1.2;">Checkout Our Global Elections & AI Tracker</h2>
+                        <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
+                          Monitor election trends and AI's impact on political campaigns in real-time with our interactive dashboard.
+                        </p>
+                        <table border="0" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="background-color: #0066ff; border-radius: 50px; padding: 0;">
+                              <a href="#" style="color: #FFFFFF; display: block; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500; line-height: 1.2; padding: 12px 24px; text-decoration: none; text-align: center;">
+                                <table border="0" cellpadding="0" cellspacing="0" style="display: inline-block; vertical-align: middle;">
+                                  <tr>
+                                    <td style="padding-right: 8px;">Visit Website</td>
+                                    <td>
+                                      <img src="https://cdn-icons-png.flaticon.com/512/9131/9131526.png" alt="Arrow" width="16" height="16" style="display: block;" />
+                                    </td>
+                                  </tr>
+                                </table>
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            
             <!-- Op-Ed section title -->
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
               <tr>
-                <td style="padding-bottom: 15px;">
+                <td style="padding-bottom: 15px; border-bottom: 3px solid #6366f1;">
                   <h2 style="color: #333; font-size: 22px; margin: 0; font-weight: 600;">Latest Op-Eds</h2>
                 </td>
               </tr>
             </table>
             
-            <!-- Op-Ed articles - two column layout -->
+            <!-- Op-Ed articles - improved layout -->
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
               <tr valign="top">
                 <!-- First article - India's AI Boom -->
                 <td width="48%" style="padding: 0 2% 20px 0;">
-                  <a href="#" style="text-decoration: none; color: inherit;">
-                    <img src="https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80" alt="India's AI Boom" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
-                  </a>
-                  <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
-                    <a href="#" style="text-decoration: none; color: inherit;">India's AI Boom: A Moment of Opportunity and Challenge</a>
-                  </h3>
-                  <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Alisha Butala • 6 min read</p>
-                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
-                    As India advances in artificial intelligence, the country faces a dual challenge: harnessing AI for economic growth while protecting its workforce from exploitation. Government initiatives like Digital India are driving technological innovation, but global tech giants are extracting vast amounts of data and leveraging India's low-cost labor without fair compensation.
-                  </p>
-                  
-                  <!-- Combating AI-Generated Misinformation integrated with first op-ed -->
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0; padding: 10px; background-color: #f0f0f5; border-radius: 4px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #eaeaea; border-radius: 6px; overflow: hidden;">
                     <tr>
                       <td>
-                        <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">Combating AI-Generated Misinformation</h4>
-                        <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
-                          The rise of AI-powered disinformation highlights the need for stronger media literacy, especially in rapidly developing markets like India. Misinformation spreads fast, and many voters may struggle to differentiate between real and AI-generated content.
-                        </p>
+                        <a href="#" style="text-decoration: none; color: inherit;">
+                          <img src="https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80" alt="India's AI Boom" width="100%" style="display: block; border: 0; border-radius: 4px 4px 0 0;" />
+                        </a>
                       </td>
                     </tr>
-                  </table>
-                  
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
                     <tr>
-                      <td align="center">
-                        <table border="0" cellpadding="0" cellspacing="0">
+                      <td style="padding: 16px;">
+                        <h3 style="color: #333; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
+                          <a href="#" style="text-decoration: none; color: inherit;">India's AI Boom: A Moment of Opportunity and Challenge</a>
+                        </h3>
+                        <p style="color: #666; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid #eaeaea; padding-bottom: 10px;">By Alisha Butala • 6 min read</p>
+                        <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 15px 0;">
+                          As India advances in artificial intelligence, the country faces a dual challenge: harnessing AI for economic growth while protecting its workforce from exploitation. Government initiatives like Digital India are driving technological innovation, but global tech giants are extracting vast amounts of data and leveraging India's low-cost labor without fair compensation.
+                        </p>
+                        
+                        <!-- Combating AI-Generated Misinformation integrated with first op-ed -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0 15px 0; padding: 12px; background-color: #f0f0f5; border-radius: 4px;">
                           <tr>
-                            <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
-                              <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
-                                Continue reading →
-                              </a>
+                            <td>
+                              <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">Combating AI-Generated Misinformation</h4>
+                              <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
+                                The rise of AI-powered disinformation highlights the need for stronger media literacy, especially in rapidly developing markets like India. Misinformation spreads fast, and many voters may struggle to differentiate between real and AI-generated content.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
+                          <tr>
+                            <td align="center">
+                              <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
+                                    <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
+                                      Continue reading →
+                                    </a>
+                                  </td>
+                                </tr>
+                              </table>
                             </td>
                           </tr>
                         </table>
@@ -254,37 +344,47 @@ const generateEmailHTML = (previewText: string) => {
                 
                 <!-- Second article - EU's Bold Regulatory Stand -->
                 <td width="48%" style="padding: 0 0 20px 2%;">
-                  <a href="#" style="text-decoration: none; color: inherit;">
-                    <img src="https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80" alt="EU's Bold Regulatory Stand" width="100%" style="display: block; border: 0; border-radius: 4px; margin-bottom: 10px;" />
-                  </a>
-                  <h3 style="color: #333; font-size: 18px; margin: 10px 0 5px 0; font-weight: 500;">
-                    <a href="#" style="text-decoration: none; color: inherit;">AI's Double-Edged Sword: The EU's Bold Regulatory Stand</a>
-                  </h3>
-                  <p style="color: #666; font-size: 14px; margin: 0 0 5px 0;">By Parishrut Jassal • 5 min read</p>
-                  <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 10px 0;">
-                    In an era when artificial intelligence is rewriting the rules of business, governance, and daily life, the European Union is boldly stepping in to ensure that technological innovation does not come at the expense of our fundamental rights. As AI systems revolutionize industries from healthcare to finance, they also raise serious concerns.
-                  </p>
-                  
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #eaeaea; border-radius: 6px; overflow: hidden;">
                     <tr>
                       <td>
-                        <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">The Global Kaleidoscope</h4>
-                        <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
-                          According to a Reuters report, the new guidelines also cover the misuse of AI by employers, websites, and law enforcement. For instance, employers are now banned from using AI to monitor employees' emotions via webcams or voice recognition systems.
-                        </p>
+                        <a href="#" style="text-decoration: none; color: inherit;">
+                          <img src="https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80" alt="EU's Bold Regulatory Stand" width="100%" style="display: block; border: 0; border-radius: 4px 4px 0 0;" />
+                        </a>
                       </td>
                     </tr>
-                  </table>
-                  
-                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
                     <tr>
-                      <td align="center">
-                        <table border="0" cellpadding="0" cellspacing="0">
+                      <td style="padding: 16px;">
+                        <h3 style="color: #333; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
+                          <a href="#" style="text-decoration: none; color: inherit;">AI's Double-Edged Sword: The EU's Bold Regulatory Stand</a>
+                        </h3>
+                        <p style="color: #666; font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid #eaeaea; padding-bottom: 10px;">By Parishrut Jassal • 5 min read</p>
+                        <p style="color: #444; font-size: 15px; line-height: 22px; margin: 0 0 15px 0;">
+                          In an era when artificial intelligence is rewriting the rules of business, governance, and daily life, the European Union is boldly stepping in to ensure that technological innovation does not come at the expense of our fundamental rights. As AI systems revolutionize industries from healthcare to finance, they also raise serious concerns.
+                        </p>
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 10px 0 15px 0; padding: 12px; background-color: #f8f9fa; border-radius: 4px;">
                           <tr>
-                            <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
-                              <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
-                                Continue reading →
-                              </a>
+                            <td>
+                              <h4 style="color: #333; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">The Global Kaleidoscope</h4>
+                              <p style="color: #444; font-size: 14px; line-height: 20px; margin: 0;">
+                                According to a Reuters report, the new guidelines also cover the misuse of AI by employers, websites, and law enforcement. For instance, employers are now banned from using AI to monitor employees' emotions via webcams or voice recognition systems.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 10px;">
+                          <tr>
+                            <td align="center">
+                              <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <td style="border-radius: 4px; background-color: #6366f1; padding: 8px 16px;">
+                                    <a href="#" style="font-size: 14px; color: #ffffff; text-decoration: none; display: inline-block;">
+                                      Continue reading →
+                                    </a>
+                                  </td>
+                                </tr>
+                              </table>
                             </td>
                           </tr>
                         </table>
@@ -296,7 +396,7 @@ const generateEmailHTML = (previewText: string) => {
             </table>
             
             <!-- Newsletter signup -->
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0; background-color: #6366f1; border-radius: 4px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0; background-color: #6366f1; border-radius: 8px;">
               <tr>
                 <td style="padding: 25px; text-align: center;">
                   <h3 style="color: white; font-size: 20px; margin: 0 0 15px 0; font-weight: 500;">Stay Updated with Future Shift Labs</h3>
