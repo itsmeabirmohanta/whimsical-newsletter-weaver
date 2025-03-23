@@ -30,7 +30,7 @@ const NewsletterHeader = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Mail className="h-6 w-6 mr-2 text-primary" />
-            <h1 className="text-lg font-medium">Modern Digest</h1>
+            <h1 className="text-lg font-medium">Future Shift Labs</h1>
           </div>
           
           <div className="flex items-center gap-4">
