@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Grip, X, Edit, Check, Save } from 'lucide-react';
+import { Grip, X, Edit, Check, Save, Plus, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SortableNewsletterItemProps {
   item: NewsletterItem;
@@ -53,6 +54,37 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
   const handleCancel = () => {
     setEditedContent(item.content);
     setIsEditing(false);
+  };
+
+  const handleAddArticleToGrid = () => {
+    const updatedContent = { ...editedContent };
+    updatedContent.articles = [
+      ...updatedContent.articles, 
+      {
+        id: uuidv4(),
+        title: 'New Article',
+        author: 'Author Name',
+        image: 'https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80',
+        excerpt: 'Brief description of this article...'
+      }
+    ];
+    setEditedContent(updatedContent);
+  };
+
+  const handleUpdateArticle = (index: number, field: string, value: string) => {
+    const updatedContent = { ...editedContent };
+    updatedContent.articles = [...updatedContent.articles];
+    updatedContent.articles[index] = {
+      ...updatedContent.articles[index],
+      [field]: value
+    };
+    setEditedContent(updatedContent);
+  };
+
+  const handleRemoveArticle = (index: number) => {
+    const updatedContent = { ...editedContent };
+    updatedContent.articles = updatedContent.articles.filter((_, i) => i !== index);
+    setEditedContent(updatedContent);
   };
 
   const renderContent = () => {
@@ -244,8 +276,115 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
               </div>
             </div>
           );
+        case 'featured-article':
+          return (
+            <div className="space-y-4 border rounded-md p-4 bg-gray-50">
+              <h4 className="font-medium">Featured Article</h4>
+              
+              <div className="space-y-3">
+                <Input 
+                  value={editedContent.title || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, title: e.target.value})}
+                  placeholder="Article title" 
+                />
+                
+                <Input 
+                  value={editedContent.author || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, author: e.target.value})}
+                  placeholder="Author name" 
+                />
+                
+                <Input 
+                  value={editedContent.date || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, date: e.target.value})}
+                  placeholder="Publication date (e.g. May 15, 2024)" 
+                />
+                
+                <Input 
+                  value={editedContent.image || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, image: e.target.value})}
+                  placeholder="Featured image URL" 
+                />
+                
+                <Textarea 
+                  value={editedContent.excerpt || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, excerpt: e.target.value})}
+                  placeholder="Article excerpt" 
+                  rows={3}
+                />
+                
+                <Input 
+                  value={editedContent.cta || 'Read more'} 
+                  onChange={(e) => setEditedContent({...editedContent, cta: e.target.value})}
+                  placeholder="Call to action text" 
+                />
+              </div>
+            </div>
+          );
+        case 'article-grid':
+          return (
+            <div className="space-y-4 border rounded-md p-4 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Article Grid</h4>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleAddArticleToGrid}
+                  className="flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Add Article
+                </Button>
+              </div>
+              
+              {editedContent.articles && editedContent.articles.map((article: any, index: number) => (
+                <div key={article.id || index} className="border p-3 rounded-md bg-white space-y-3 relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6 text-destructive"
+                    onClick={() => handleRemoveArticle(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  
+                  <h5 className="font-medium text-sm mb-2 pr-6">Article {index + 1}</h5>
+                  
+                  <Input 
+                    value={article.title || ''} 
+                    onChange={(e) => handleUpdateArticle(index, 'title', e.target.value)}
+                    placeholder="Article title" 
+                  />
+                  
+                  <Input 
+                    value={article.author || ''} 
+                    onChange={(e) => handleUpdateArticle(index, 'author', e.target.value)}
+                    placeholder="Author name" 
+                  />
+                  
+                  <Input 
+                    value={article.image || ''} 
+                    onChange={(e) => handleUpdateArticle(index, 'image', e.target.value)}
+                    placeholder="Image URL" 
+                  />
+                  
+                  <Textarea 
+                    value={article.excerpt || ''} 
+                    onChange={(e) => handleUpdateArticle(index, 'excerpt', e.target.value)}
+                    placeholder="Brief excerpt" 
+                    rows={2}
+                  />
+                </div>
+              ))}
+              
+              {(!editedContent.articles || editedContent.articles.length === 0) && (
+                <div className="text-center py-4 text-muted-foreground">
+                  No articles yet. Click "Add Article" to create one.
+                </div>
+              )}
+            </div>
+          );
         default:
-          return <div className="italic text-gray-500">Visual editing not available for this complex block type. Please delete and re-add to modify.</div>;
+          return <div className="italic text-gray-500">Unknown block type</div>;
       }
     }
   };

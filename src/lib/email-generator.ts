@@ -164,11 +164,32 @@ export const generateEmailHTML = (items: NewsletterItem[]): string => {
               <h3 class="featured-article-title">${item.content.title}</h3>
               <p class="featured-article-meta">By ${item.content.author} • ${item.content.date}</p>
               <p>${item.content.excerpt}</p>
-              <a href="#" class="button">${item.content.cta} →</a>
+              <a href="#" class="button">${item.content.cta || 'Read More'} →</a>
             </div>
           </div>
         `;
       case 'article-grid':
+        // Handle case when articles array is missing or empty
+        if (!item.content.articles || item.content.articles.length === 0) {
+          return '<p>No articles available</p>';
+        }
+        
+        // Handle case when there's only one article
+        if (item.content.articles.length === 1) {
+          const article = item.content.articles[0];
+          return `
+            <div class="featured-article" style="margin-bottom: 20px;">
+              <img src="${article.image}" alt="${article.title}" style="height: 120px; object-fit: cover;">
+              <div class="featured-article-content">
+                <h3 class="featured-article-title">${article.title}</h3>
+                <p class="featured-article-meta">By ${article.author}</p>
+                <p>${article.excerpt}</p>
+              </div>
+            </div>
+          `;
+        }
+        
+        // Normal case with multiple articles
         return `
           <div class="article-grid">
             ${item.content.articles.map((article: any) => `
