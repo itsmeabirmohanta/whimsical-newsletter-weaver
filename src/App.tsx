@@ -9,6 +9,7 @@ import { LazyMotion, domAnimation } from "framer-motion";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import EmailNewsletterTemplate from "./components/EmailNewsletterTemplate";
+import NewsletterBuilder from "./pages/NewsletterBuilder";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/email-template" element={<EmailNewsletterTemplate />} />
+                <Route path="/newsletter-builder" element={<NewsletterBuilder />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

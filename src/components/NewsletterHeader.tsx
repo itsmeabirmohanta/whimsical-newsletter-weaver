@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightCircle, Mail, Bell, FileText } from 'lucide-react';
+import { ArrowRightCircle, Mail, Bell, FileText, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubscribeModal from './SubscribeModal';
 import { Link } from 'react-router-dom';
@@ -34,6 +34,17 @@ const NewsletterHeader = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <Link to="/newsletter-builder">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:flex items-center gap-2 hover:bg-secondary"
+              >
+                <Layers size={16} />
+                <span>Newsletter Builder</span>
+              </Button>
+            </Link>
+            
             <Link to="/email-template">
               <Button 
                 variant="ghost" 
