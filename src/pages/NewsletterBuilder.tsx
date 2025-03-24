@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -17,8 +16,14 @@ import { generateEmailHTML } from '@/lib/email-generator';
 // Define the interface for newsletter items
 export interface NewsletterItem {
   id: string;
-  type: 'heading' | 'paragraph' | 'image' | 'button' | 'divider' | 'spacer' | 'featured-article' | 'article-grid';
+  type: 'heading' | 'paragraph' | 'image' | 'button' | 'divider' | 'spacer' | 'featured-article' | 'article-grid' | 'compartment';
   content: any;
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
+  };
 }
 
 const initialItems: NewsletterItem[] = [
@@ -49,6 +54,11 @@ const initialItems: NewsletterItem[] = [
       image: 'https://images.unsplash.com/photo-1635032730510-05feceacc9e5?auto=format&fit=crop&w=1200&q=80',
       excerpt: 'The 2024 elections were a turning point for global democracy, with nearly 74 countries heading to the polls. AI played a more significant role than ever before.',
       cta: 'Continue reading',
+      linkUrl: '#',
+    },
+    style: {
+      buttonColor: '#8b5cf6',
+      buttonTextColor: '#ffffff',
     },
   },
   {
@@ -62,6 +72,8 @@ const initialItems: NewsletterItem[] = [
           author: 'Alisha Butala',
           image: 'https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80',
           excerpt: 'As India advances in artificial intelligence, the country faces a dual challenge...',
+          linkUrl: '#',
+          linkText: 'Read More',
         },
         {
           id: 'op-ed-2',
@@ -69,8 +81,14 @@ const initialItems: NewsletterItem[] = [
           author: 'Parishrut Jassal',
           image: 'https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80',
           excerpt: 'In an era when artificial intelligence is rewriting the rules of business, governance, and daily life...',
+          linkUrl: '#',
+          linkText: 'Read More',
         }
       ]
+    },
+    style: {
+      buttonColor: '#8b5cf6',
+      buttonTextColor: '#ffffff',
     },
   },
 ];
@@ -91,7 +109,6 @@ const NewsletterBuilder = () => {
     })
   );
 
-  // Fixed the type definition to match DragStartEvent from @dnd-kit/core
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(String(event.active.id));
   };
@@ -129,7 +146,6 @@ const NewsletterBuilder = () => {
   };
 
   const handleSaveTemplate = () => {
-    // In a real app, this would save to backend
     localStorage.setItem('newsletter-template', JSON.stringify(items));
     toast.success("Newsletter template saved");
   };
@@ -141,7 +157,6 @@ const NewsletterBuilder = () => {
   };
 
   const handleSendTestEmail = () => {
-    // This would connect to an email service in a real implementation
     toast.success("Test email sent! Check your inbox");
   };
   
@@ -220,7 +235,6 @@ const NewsletterBuilder = () => {
           ) : (
             <div className="bg-gray-50 p-6 rounded-lg border min-h-[600px] overflow-auto">
               <div className="max-w-2xl mx-auto bg-white p-8 shadow rounded-lg">
-                {/* Preview mode - render the actual email content */}
                 <div dangerouslySetInnerHTML={{ __html: generateEmailHTML(items) }} />
               </div>
             </div>

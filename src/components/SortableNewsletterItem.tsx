@@ -1,4 +1,3 @@
-
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { NewsletterItem } from '@/pages/NewsletterBuilder';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Grip, X, Edit, Check, Save, Plus, Trash2 } from 'lucide-react';
+import { Grip, X, Edit, Check, Save, Plus, Trash2, Link, Palette } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,10 +19,13 @@ interface SortableNewsletterItemProps {
 export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNewsletterItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(item.content);
+  const [editedStyle, setEditedStyle] = useState(item.style || {});
+  const [isStyleEditing, setIsStyleEditing] = useState(false);
   
   useEffect(() => {
     // Update edited content when item changes (like when reordering)
     setEditedContent(item.content);
+    setEditedStyle(item.style || {});
   }, [item]);
 
   const {
@@ -45,15 +47,19 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
     if (isEditing) {
       onUpdate({
         ...item,
-        content: editedContent
+        content: editedContent,
+        style: editedStyle
       });
     }
     setIsEditing(!isEditing);
+    setIsStyleEditing(false);
   };
 
   const handleCancel = () => {
     setEditedContent(item.content);
+    setEditedStyle(item.style || {});
     setIsEditing(false);
+    setIsStyleEditing(false);
   };
 
   const handleAddArticleToGrid = () => {
@@ -65,7 +71,9 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
         title: 'New Article',
         author: 'Author Name',
         image: 'https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80',
-        excerpt: 'Brief description of this article...'
+        excerpt: 'Brief description of this article...',
+        linkUrl: '#',
+        linkText: 'Read More',
       }
     ];
     setEditedContent(updatedContent);
@@ -85,6 +93,105 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
     const updatedContent = { ...editedContent };
     updatedContent.articles = updatedContent.articles.filter((_, i) => i !== index);
     setEditedContent(updatedContent);
+  };
+
+  const handleStyleToggle = () => {
+    setIsStyleEditing(!isStyleEditing);
+  };
+
+  const handleStyleChange = (property: string, value: string) => {
+    setEditedStyle({
+      ...editedStyle,
+      [property]: value
+    });
+  };
+
+  const renderStyleEditor = () => {
+    if (!isStyleEditing) return null;
+    
+    return (
+      <div className="space-y-3 border-t pt-3 mt-3">
+        <h5 className="font-medium text-sm">Style Customization</h5>
+        
+        <div className="grid grid-cols-1 gap-2">
+          {(item.type !== 'divider' && item.type !== 'spacer') && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-24 text-xs">Background:</div>
+                <Input 
+                  type="color"
+                  value={editedStyle.backgroundColor || '#ffffff'} 
+                  onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
+                  className="w-14 h-8 p-1"
+                />
+                <Input 
+                  type="text"
+                  value={editedStyle.backgroundColor || ''} 
+                  onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
+                  placeholder="#ffffff"
+                  className="flex-1 h-8 text-xs"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="w-24 text-xs">Text Color:</div>
+                <Input 
+                  type="color"
+                  value={editedStyle.textColor || '#333333'} 
+                  onChange={(e) => handleStyleChange('textColor', e.target.value)}
+                  className="w-14 h-8 p-1"
+                />
+                <Input 
+                  type="text"
+                  value={editedStyle.textColor || ''} 
+                  onChange={(e) => handleStyleChange('textColor', e.target.value)}
+                  placeholder="#333333"
+                  className="flex-1 h-8 text-xs"
+                />
+              </div>
+            </>
+          )}
+          
+          {(item.type === 'button' || item.type === 'featured-article' || item.type === 'article-grid') && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-24 text-xs">Button Color:</div>
+                <Input 
+                  type="color"
+                  value={editedStyle.buttonColor || '#8b5cf6'} 
+                  onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
+                  className="w-14 h-8 p-1"
+                />
+                <Input 
+                  type="text"
+                  value={editedStyle.buttonColor || ''} 
+                  onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
+                  placeholder="#8b5cf6"
+                  className="flex-1 h-8 text-xs"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="w-24 text-xs">Button Text:</div>
+                <Input 
+                  type="color"
+                  value={editedStyle.buttonTextColor || '#ffffff'} 
+                  onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                  className="w-14 h-8 p-1"
+                />
+                <Input 
+                  type="text"
+                  value={editedStyle.buttonTextColor || ''} 
+                  onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                  placeholder="#ffffff"
+                  className="flex-1 h-8 text-xs"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const renderContent = () => {
@@ -119,21 +226,37 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
           return <div style={{ height: `${item.content.height}px` }} />;
         case 'featured-article':
           return (
-            <div className="border rounded-md overflow-hidden">
+            <div className="border rounded-md overflow-hidden" style={{
+              backgroundColor: item.style?.backgroundColor || 'inherit',
+              color: item.style?.textColor || 'inherit'
+            }}>
               <img src={item.content.image} alt={item.content.title} className="w-full h-48 object-cover" />
               <div className="p-4">
                 <h3 className="text-lg font-semibold">{item.content.title}</h3>
                 <p className="text-sm text-gray-500">By {item.content.author} • {item.content.date}</p>
                 <p className="mt-2">{item.content.excerpt}</p>
                 <div className="mt-4">
-                  <Button variant="default" size="sm" className="bg-primary text-white hover:bg-primary/90">{item.content.cta} →</Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="text-white hover:bg-primary/90"
+                    style={{
+                      backgroundColor: item.style?.buttonColor || '#8b5cf6',
+                      color: item.style?.buttonTextColor || '#ffffff'
+                    }}
+                  >
+                    {item.content.cta} →
+                  </Button>
                 </div>
               </div>
             </div>
           );
         case 'article-grid':
           return (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" style={{
+              backgroundColor: item.style?.backgroundColor || 'inherit',
+              color: item.style?.textColor || 'inherit'
+            }}>
               {item.content.articles.map((article: any) => (
                 <div key={article.id} className="border rounded-md overflow-hidden">
                   <img src={article.image} alt={article.title} className="w-full h-32 object-cover" />
@@ -141,16 +264,38 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
                     <h4 className="font-medium text-sm">{article.title}</h4>
                     <p className="text-xs text-gray-500">By {article.author}</p>
                     <p className="text-xs mt-1 line-clamp-2">{article.excerpt}</p>
+                    {article.linkUrl && (
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="mt-2 text-white text-xs px-2 py-1 h-auto"
+                        style={{
+                          backgroundColor: item.style?.buttonColor || '#8b5cf6',
+                          color: item.style?.buttonTextColor || '#ffffff'
+                        }}
+                      >
+                        {article.linkText || 'Read More'} →
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
+            </div>
+          );
+        case 'compartment':
+          return (
+            <div className="border rounded-md overflow-hidden p-4" style={{
+              backgroundColor: item.style?.backgroundColor || '#f3f4f6',
+              color: item.style?.textColor || 'inherit'
+            }}>
+              <h3 className="font-medium">{item.content.title || 'Compartment'}</h3>
+              <div className="mt-2" dangerouslySetInnerHTML={{ __html: item.content.content }} />
             </div>
           );
         default:
           return <div>Unknown block type</div>;
       }
     } else {
-      // Edit mode UI
       switch (item.type) {
         case 'heading':
           return (
@@ -318,6 +463,15 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
                   onChange={(e) => setEditedContent({...editedContent, cta: e.target.value})}
                   placeholder="Call to action text" 
                 />
+                
+                <div className="flex items-center space-x-2">
+                  <Link className="h-4 w-4 text-gray-500" />
+                  <Input 
+                    value={editedContent.linkUrl || ''} 
+                    onChange={(e) => setEditedContent({...editedContent, linkUrl: e.target.value})}
+                    placeholder="Link URL (e.g. https://example.com)" 
+                  />
+                </div>
               </div>
             </div>
           );
@@ -326,14 +480,24 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
             <div className="space-y-4 border rounded-md p-4 bg-gray-50">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">Article Grid</h4>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={handleAddArticleToGrid}
-                  className="flex items-center"
-                >
-                  <Plus className="h-4 w-4 mr-1" /> Add Article
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleStyleToggle}
+                    className="flex items-center"
+                  >
+                    <Palette className="h-4 w-4 mr-1" /> Style
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleAddArticleToGrid}
+                    className="flex items-center"
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Article
+                  </Button>
+                </div>
               </div>
               
               {editedContent.articles && editedContent.articles.map((article: any, index: number) => (
@@ -373,6 +537,21 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
                     placeholder="Brief excerpt" 
                     rows={2}
                   />
+                  
+                  <div className="flex items-center space-x-2">
+                    <Link className="h-4 w-4 text-gray-500" />
+                    <Input 
+                      value={article.linkUrl || ''} 
+                      onChange={(e) => handleUpdateArticle(index, 'linkUrl', e.target.value)}
+                      placeholder="Link URL (e.g. https://example.com)" 
+                    />
+                  </div>
+                  
+                  <Input 
+                    value={article.linkText || 'Read More'} 
+                    onChange={(e) => handleUpdateArticle(index, 'linkText', e.target.value)}
+                    placeholder="Link text" 
+                  />
                 </div>
               ))}
               
@@ -381,6 +560,31 @@ export function SortableNewsletterItem({ item, onDelete, onUpdate }: SortableNew
                   No articles yet. Click "Add Article" to create one.
                 </div>
               )}
+              
+              {renderStyleEditor()}
+            </div>
+          );
+        case 'compartment':
+          return (
+            <div className="space-y-4 border rounded-md p-4 bg-gray-50">
+              <h4 className="font-medium">Compartment Block</h4>
+              
+              <div className="space-y-3">
+                <Input 
+                  value={editedContent.title || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, title: e.target.value})}
+                  placeholder="Compartment title" 
+                />
+                
+                <Textarea 
+                  value={editedContent.content || ''} 
+                  onChange={(e) => setEditedContent({...editedContent, content: e.target.value})}
+                  placeholder="Compartment content" 
+                  rows={4}
+                />
+              </div>
+              
+              {renderStyleEditor()}
             </div>
           );
         default:

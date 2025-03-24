@@ -1,7 +1,6 @@
-
 import { Button } from '@/components/ui/button';
 import { NewsletterItem } from '@/pages/NewsletterBuilder';
-import { PlusCircle, Type, Image, SeparatorHorizontal, MoveVertical, LayoutList } from 'lucide-react';
+import { PlusCircle, Type, Image, SeparatorHorizontal, MoveVertical, LayoutList, Box } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface NewsletterItemListProps {
@@ -74,6 +73,21 @@ export function NewsletterItemList({ onAddItem }: NewsletterItemListProps) {
     });
   };
 
+  const handleAddCompartment = () => {
+    onAddItem({
+      id: uuidv4(),
+      type: 'compartment',
+      content: {
+        title: 'Compartment Section',
+        content: 'Add your content here. This can be used for callouts, quotes, or important information.',
+      },
+      style: {
+        backgroundColor: '#f3f4f6',
+        textColor: '#111827',
+      },
+    });
+  };
+
   const handleAddFeaturedArticle = () => {
     onAddItem({
       id: uuidv4(),
@@ -85,6 +99,13 @@ export function NewsletterItemList({ onAddItem }: NewsletterItemListProps) {
         image: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=800&q=80',
         excerpt: 'This is a brief description of the featured article. Edit this text to add your content.',
         cta: 'Read More',
+        linkUrl: '#',
+      },
+      style: {
+        backgroundColor: '',
+        textColor: '',
+        buttonColor: '#8b5cf6',
+        buttonTextColor: '#ffffff',
       },
     });
   };
@@ -101,6 +122,8 @@ export function NewsletterItemList({ onAddItem }: NewsletterItemListProps) {
             author: 'Author 1',
             image: 'https://images.unsplash.com/photo-1598965402089-897e8f3f1c70?auto=format&fit=crop&w=800&q=80',
             excerpt: 'Brief description of article 1',
+            linkUrl: '#',
+            linkText: 'Read More',
           },
           {
             id: uuidv4(),
@@ -108,8 +131,16 @@ export function NewsletterItemList({ onAddItem }: NewsletterItemListProps) {
             author: 'Author 2',
             image: 'https://images.unsplash.com/photo-1569396116180-210c182bedb8?auto=format&fit=crop&w=800&q=80',
             excerpt: 'Brief description of article 2',
+            linkUrl: '#',
+            linkText: 'Read More',
           },
         ],
+      },
+      style: {
+        backgroundColor: '',
+        textColor: '',
+        buttonColor: '#8b5cf6',
+        buttonTextColor: '#ffffff',
       },
     });
   };
@@ -147,6 +178,11 @@ export function NewsletterItemList({ onAddItem }: NewsletterItemListProps) {
         <Button variant="outline" className="justify-start" onClick={handleAddSpacer}>
           <MoveVertical className="mr-2 h-4 w-4" />
           Spacer
+        </Button>
+        
+        <Button variant="outline" className="justify-start" onClick={handleAddCompartment}>
+          <Box className="mr-2 h-4 w-4" />
+          Compartment
         </Button>
       </div>
       
