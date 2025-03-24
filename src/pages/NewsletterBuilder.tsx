@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import { Button } from '@/components/ui/button';
@@ -81,14 +81,19 @@ const NewsletterBuilder = () => {
   const [previewMode, setPreviewMode] = useState<'edit' | 'preview'>('edit');
   
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Minimum drag distance in pixels
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const handleDragStart = (event: { active: { id: string } }) => {
-    setActiveId(event.active.id);
+  // Fixed the type definition to match DragStartEvent from @dnd-kit/core
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -96,8 +101,8 @@ const NewsletterBuilder = () => {
     
     if (over && active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+        const oldIndex = items.findIndex((item) => item.id === String(active.id));
+        const newIndex = items.findIndex((item) => item.id === String(over.id));
         
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -120,6 +125,7 @@ const NewsletterBuilder = () => {
     setItems(items.map(item => 
       item.id === updatedItem.id ? updatedItem : item
     ));
+    toast.success("Item updated");
   };
 
   const handleSaveTemplate = () => {
