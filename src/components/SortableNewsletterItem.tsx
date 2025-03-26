@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { NewsletterItem } from '@/pages/NewsletterBuilder';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -17,16 +16,11 @@ import { toast } from 'sonner';
 
 interface SortableNewsletterItemProps {
   item: NewsletterItem;
-  onUpdate: (updates: Partial<NewsletterItem>) => void;
-  onDelete: () => void;
-  showColorControls?: boolean;
-  themeColors?: {
-    backgroundColor: string;
-    textColor: string;
-    linkColor: string;
-  };
-  onSelect?: (id: string) => void;
-  isSelected?: boolean;
+  onUpdate: (updatedItem: NewsletterItem) => void;
+  onDelete: (id: string) => void;
+  isEditing: boolean;
+  showColorControls: boolean;
+  onEditChange?: (isEditing: boolean) => void;
 }
 
 // Define quiz-related interfaces
@@ -41,54 +35,168 @@ interface Quiz {
   options: QuizOption[];
 }
 
-// Define types for our content values
+// Define interfaces for complex component content
+interface SocialLink {
+  platform: string;
+  url: string;
+}
+
+interface Article {
+  title: string;
+  author: string;
+  date?: string;
+  image: string;
+  excerpt?: string;
+  linkUrl?: string;
+  linkText?: string;
+}
+
+interface Event {
+  title: string;
+  date: string;
+  time?: string;
+  location?: string;
+  description?: string;
+}
+
+interface Product {
+  name: string;
+  image: string;
+  price: string;
+  description?: string;
+  discount?: string;
+  link?: string;
+}
+
+interface QuizQuestion {
+  question: string;
+  image?: string;
+  options: QuizOption[];
+}
+
+// Define the NewsletterItem type
+type NewsletterItemType = 
+  | 'header'
+  | 'heading'
+  | 'paragraph'
+  | 'image'
+  | 'button'
+  | 'divider'
+  | 'spacer'
+  | 'compartment'
+  | 'featured-article'
+  | 'article-grid'
+  | 'cta-banner'
+  | 'testimonial'
+  | 'event-calendar'
+  | 'quiz'
+  | 'product-recommendation'
+  | 'subscribe-now'
+  | 'footer';
+
+interface NewsletterItemStyle {
+  backgroundColor?: string;
+  textColor?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  padding?: string;
+  backgroundImage?: string;
+  backgroundGradient?: string;
+  backgroundOpacity?: number;
+}
+
+interface NewsletterItem {
+  id: string;
+  type: NewsletterItemType;
+  content: {
+    text?: string;
+    level?: 'h1' | 'h2' | 'h3';
+    align?: 'left' | 'center' | 'right';
+    url?: string;
+    alt?: string;
+    caption?: string;
+    height?: number;
+    title?: string;
+    content?: string;
+    author?: string;
+    date?: string;
+    image?: string;
+    excerpt?: string;
+    linkUrl?: string;
+    linkText?: string;
+    cta?: string;
+    logoUrl?: string;
+    logoAlt?: string;
+    companyName?: string;
+    tagline?: string;
+    address?: string;
+    contactEmail?: string;
+    websiteUrl?: string;
+    unsubscribeUrl?: string;
+    socialLinks?: SocialLink[];
+    articles?: Article[];
+    events?: Event[];
+    products?: Product[];
+    questions?: QuizQuestion[];
+    subscribeTitle?: string;
+    subscribeMessage?: string;
+    subscribeFormPlaceholder?: string;
+    subscribeButtonText?: string;
+    subscribeFormAction?: string;
+    quote?: string;
+    attribution?: string;
+    role?: string;
+    company?: string;
+    buttonText?: string;
+    quizzes?: QuizQuestion[];
+  };
+  style?: NewsletterItemStyle;
+}
+
+// Update ContentValue type to use the new interfaces
 type ContentValue = 
   | string 
   | number 
-  | { [key: string]: any } // Allow any object structure for complex components
-  | Array<{ platform: string; url: string; [key: string]: any }>
-  | Array<{ 
-      title: string; 
-      author: string; 
-      date?: string; 
-      image: string; 
-      excerpt?: string; 
-      linkUrl?: string; 
-      linkText?: string; 
-      [key: string]: any;
-    }>
-  | Array<{
-      title: string;
-      date: string;
-      time?: string;
-      location?: string;
-      description?: string;
-      [key: string]: any;
-    }>
-  | Quiz[]
-  | Array<{
-      name: string;
-      image: string;
-      price: string;
-      description?: string;
-      discount?: string;
-      link?: string;
-      [key: string]: any;
-    }>;
+  | SocialLink[]
+  | Article[]
+  | Event[]
+  | QuizQuestion[]
+  | Product[]
+  | {
+      title?: string;
+      content?: string;
+      buttonText?: string;
+      linkUrl?: string;
+      subscribeTitle?: string;
+      subscribeMessage?: string;
+      subscribeFormPlaceholder?: string;
+      subscribeButtonText?: string;
+      subscribeFormAction?: string;
+      companyName?: string;
+      tagline?: string;
+      logoUrl?: string;
+      logoAlt?: string;
+      address?: string;
+      contactEmail?: string;
+      websiteUrl?: string;
+      unsubscribeUrl?: string;
+      quote?: string;
+      attribution?: string;
+      role?: string;
+      company?: string;
+    };
 
 const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
   item,
   onUpdate,
   onDelete,
-  showColorControls = false,
-  themeColors,
-  onSelect,
-  isSelected = false
+  isEditing,
+  showColorControls,
+  onEditChange
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("content");
-  
   const {
     attributes,
     listeners,
@@ -97,70 +205,61 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
     transition,
     isDragging
   } = useSortable({ id: item.id });
-  
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-  
-  // Update content of the item with proper typing
-  const handleContentChange = (key: string, value: ContentValue) => {
+
+  const handleContentChange = (key: keyof NewsletterItem['content'], value: any) => {
     onUpdate({
+      ...item,
       content: {
         ...item.content,
         [key]: value
       }
     });
   };
-  
-  // Specialized function to handle social links array
-  const handleSocialLinksChange = (newLinks: Array<{platform: string, url: string}>) => {
+
+  const handleStyleChange = (key: keyof NewsletterItemStyle, value: string | number) => {
     onUpdate({
-      content: {
-        ...item.content,
-        socialLinks: newLinks
-      }
-    });
-  };
-  
-  // Update style of the item
-  const handleStyleChange = (key: string, value: string) => {
-    onUpdate({
+      ...item,
       style: {
         ...item.style,
         [key]: value
       }
     });
   };
-  
-  // Gets the appropriate style for content preview based on the item's style properties
+
+  const handleSocialLinksChange = (newLinks: SocialLink[]) => {
+    onUpdate({
+      ...item,
+      content: {
+        ...item.content,
+        socialLinks: newLinks
+      }
+    });
+  };
+
+  const handleEditToggle = () => {
+    if (onEditChange) {
+      onEditChange(!isEditing);
+    }
+  };
+
   const getPreviewStyle = () => {
     const style: React.CSSProperties = {};
     
-    // First apply theme colors from props
-    if (themeColors) {
-      if (!item.style?.backgroundColor) {
-        style.backgroundColor = themeColors.backgroundColor;
-      }
-      if (!item.style?.textColor) {
-        style.color = themeColors.textColor;
-      }
-    }
-    
-    // Then apply component-specific styles (which take precedence)
     if (item.style) {
-      // Handle background options in priority order
       if (item.style.backgroundImage) {
         style.backgroundImage = `url(${item.style.backgroundImage})`;
         style.backgroundSize = 'cover';
         style.backgroundPosition = 'center';
-      } else if (item.style.backgroundGradient && item.style.backgroundGradient !== 'none') {
+      } else if (item.style.backgroundGradient) {
         style.backgroundImage = item.style.backgroundGradient;
       } else if (item.style.backgroundColor) {
-        // If we have opacity and not 1, convert to rgba
         if (item.style.backgroundOpacity !== undefined && item.style.backgroundOpacity < 1) {
-          // Parse the hex color to rgba
           if (item.style.backgroundColor.startsWith('#')) {
             const hex = item.style.backgroundColor.slice(1);
             const r = parseInt(hex.slice(0, 2), 16);
@@ -175,12 +274,10 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
         }
       }
       
-      // Apply text color if specified
       if (item.style.textColor) {
         style.color = item.style.textColor;
       }
       
-      // Add any other style properties
       if (item.style.borderColor) {
         style.borderColor = item.style.borderColor;
       }
@@ -201,42 +298,35 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
     return style;
   };
   
-  // Gets the appropriate style for button preview based on the item's style properties
   const getButtonStyle = () => {
     const style: React.CSSProperties = {
-      display: 'inline-block',
-      textDecoration: 'none',
-      textAlign: 'center',
+      backgroundColor: '#8b5cf6',
+      color: '#ffffff',
       padding: '8px 16px',
       borderRadius: '4px',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease-in-out',
+      textDecoration: 'none',
+      display: 'inline-block',
+      textAlign: 'center' as const,
       fontWeight: 500,
       fontSize: '14px',
-      cursor: 'pointer',
+      lineHeight: '20px',
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
     };
     
-    // Component-specific button styles take priority over theme styles
     if (item.style?.buttonColor) {
       style.backgroundColor = item.style.buttonColor;
-    } else if (themeColors?.linkColor) {
-      style.backgroundColor = themeColors.linkColor;
-    } else {
-      style.backgroundColor = '#8b5cf6'; // Default fallback
     }
     
     if (item.style?.buttonTextColor) {
       style.color = item.style.buttonTextColor;
-    } else {
-      style.color = '#ffffff'; // Default fallback
-    }
-    
-    if (item.style?.borderRadius) {
-      style.borderRadius = item.style.borderRadius;
     }
     
     return style;
   };
   
-  // Render the item preview based on its type
   const renderItemPreview = () => {
     const contentStyle = getPreviewStyle();
     const buttonStyle = getButtonStyle();
@@ -438,8 +528,8 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
       case 'article-grid':
         return (
           <div className="grid grid-cols-2 gap-4" style={contentStyle}>
-            {item.content.articles && item.content.articles.map((article, idx) => (
-              <div key={idx} className="border border-gray-200 rounded overflow-hidden transition-all duration-200 hover:shadow-md hover:border-opacity-50 cursor-pointer group flex flex-col h-full">
+            {(item.content.articles || []).map((article: Article, index: number) => (
+              <div key={index} className="border border-gray-200 rounded overflow-hidden transition-all duration-200 hover:shadow-md hover:border-opacity-50 cursor-pointer group flex flex-col h-full">
                 <a 
                   href={article.linkUrl || '#'} 
                   target="_blank"
@@ -607,15 +697,15 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                 </Button>
               ) : (
                 <div className="space-y-4">
-                  {item.content.events.map((event, eventIndex) => (
-                    <div key={eventIndex} className="border rounded-lg p-4 relative">
+                  {(item.content.events || []).map((event: Event, index: number) => (
+                    <div key={index} className="border rounded-lg p-4 relative">
                       <Button
                         variant="ghost"
                         size="icon"
                         className="absolute top-2 right-2"
                         onClick={() => {
                           const newEvents = [...(item.content.events || [])];
-                          newEvents.splice(eventIndex, 1);
+                          newEvents.splice(index, 1);
                           handleContentChange('events', newEvents);
                         }}
                       >
@@ -629,7 +719,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={event.title}
                             onChange={(e) => {
                               const newEvents = [...(item.content.events || [])];
-                              newEvents[eventIndex] = { ...newEvents[eventIndex], title: e.target.value };
+                              newEvents[index] = { ...newEvents[index], title: e.target.value };
                               handleContentChange('events', newEvents);
                             }}
                 className="mt-1"
@@ -643,7 +733,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={event.date}
                             onChange={(e) => {
                               const newEvents = [...(item.content.events || [])];
-                              newEvents[eventIndex] = { ...newEvents[eventIndex], date: e.target.value };
+                              newEvents[index] = { ...newEvents[index], date: e.target.value };
                               handleContentChange('events', newEvents);
                             }}
                 className="mt-1"
@@ -656,7 +746,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={event.time || ''}
                             onChange={(e) => {
                               const newEvents = [...(item.content.events || [])];
-                              newEvents[eventIndex] = { ...newEvents[eventIndex], time: e.target.value };
+                              newEvents[index] = { ...newEvents[index], time: e.target.value };
                               handleContentChange('events', newEvents);
                             }}
                             placeholder="e.g., 10:00 AM - 12:00 PM"
@@ -670,7 +760,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={event.location || ''}
                             onChange={(e) => {
                               const newEvents = [...(item.content.events || [])];
-                              newEvents[eventIndex] = { ...newEvents[eventIndex], location: e.target.value };
+                              newEvents[index] = { ...newEvents[index], location: e.target.value };
                               handleContentChange('events', newEvents);
                             }}
                             placeholder="Event Location"
@@ -684,7 +774,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={event.description || ''}
                             onChange={(e) => {
                               const newEvents = [...(item.content.events || [])];
-                              newEvents[eventIndex] = { ...newEvents[eventIndex], description: e.target.value };
+                              newEvents[index] = { ...newEvents[index], description: e.target.value };
                               handleContentChange('events', newEvents);
                             }}
                             className="min-h-[60px] mt-1"
@@ -810,15 +900,15 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                   </Button>
                 ) : (
                 <div className="space-y-4">
-                  {item.content.quizzes.map((quiz, quizIndex) => (
-                    <div key={quizIndex} className="border rounded-lg p-4 relative">
+                  {(item.content.quizzes || []).map((quiz: Quiz, index: number) => (
+                    <div key={index} className="border rounded-lg p-4 relative">
                           <Button 
                             variant="ghost" 
                             size="icon" 
                         className="absolute top-2 right-2"
                             onClick={() => {
                           const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                          newQuizzes.splice(quizIndex, 1);
+                          newQuizzes.splice(index, 1);
                           handleContentChange('quizzes', newQuizzes);
                             }}
                           >
@@ -832,7 +922,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={quiz.question}
                               onChange={(e) => {
                               const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                              newQuizzes[quizIndex] = { ...newQuizzes[quizIndex], question: e.target.value };
+                              newQuizzes[index] = { ...newQuizzes[index], question: e.target.value };
                               handleContentChange('quizzes', newQuizzes);
                               }}
                               className="mt-1"
@@ -845,7 +935,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             value={quiz.image || ''}
                               onChange={(e) => {
                               const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                              newQuizzes[quizIndex] = { ...newQuizzes[quizIndex], image: e.target.value };
+                              newQuizzes[index] = { ...newQuizzes[index], image: e.target.value };
                               handleContentChange('quizzes', newQuizzes);
                             }}
                             placeholder="https://example.com/image.jpg"
@@ -855,13 +945,13 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                           
                         <div className="space-y-2">
                           <Label>Options</Label>
-                          {quiz.options.map((option, optionIndex) => (
+                          {(quiz.options || []).map((option: QuizOption, optionIndex: number) => (
                             <div key={optionIndex} className="flex items-center gap-2">
                             <Input
                                 value={option.text}
                               onChange={(e) => {
                                   const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                                  newQuizzes[quizIndex].options[optionIndex].text = e.target.value;
+                                  newQuizzes[index].options[optionIndex].text = e.target.value;
                                   handleContentChange('quizzes', newQuizzes);
                                 }}
                                 className="flex-1"
@@ -869,11 +959,11 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                               <div className="flex items-center gap-2">
                                 <input
                                   type="radio"
-                                  name={`correct-${quizIndex}`}
+                                  name={`correct-${index}`}
                                   checked={option.isCorrect}
                                   onChange={() => {
                                     const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                                    newQuizzes[quizIndex].options = newQuizzes[quizIndex].options.map((opt, idx) => ({
+                                    newQuizzes[index].options = newQuizzes[index].options.map((opt, idx) => ({
                                       ...opt,
                                       isCorrect: idx === optionIndex
                                     }));
@@ -886,7 +976,7 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                                   size="icon"
                                   onClick={() => {
                                     const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                                    newQuizzes[quizIndex].options.splice(optionIndex, 1);
+                                    newQuizzes[index].options.splice(optionIndex, 1);
                                     handleContentChange('quizzes', newQuizzes);
                                   }}
                                 >
@@ -902,8 +992,8 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                             className="w-full mt-2"
                             onClick={() => {
                               const newQuizzes = [...(item.content.quizzes || [])] as Quiz[];
-                              newQuizzes[quizIndex].options.push({
-                                text: `Option ${newQuizzes[quizIndex].options.length + 1}`,
+                              newQuizzes[index].options.push({
+                                text: `Option ${newQuizzes[index].options.length + 1}`,
                                 isCorrect: false
                               });
                               handleContentChange('quizzes', newQuizzes);
@@ -952,14 +1042,14 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                 <p className="text-muted-foreground text-sm">No quiz questions added yet.</p>
               ) : (
                 <div className="space-y-4">
-                  {item.content.quizzes.map((quiz, index) => (
+                  {(item.content.quizzes || []).map((quiz: Quiz, index: number) => (
                     <div key={index} className="border rounded-lg p-4">
                       <h4 className="font-medium mb-2">{quiz.question}</h4>
                       {quiz.image && (
                         <img src={quiz.image} alt="Quiz question" className="mb-2 max-w-full h-auto rounded" />
                       )}
                       <div className="space-y-2">
-                        {quiz.options.map((option, optionIndex) => (
+                        {(quiz.options || []).map((option: QuizOption, optionIndex: number) => (
                           <div key={optionIndex} className="flex items-center gap-2">
                             <input 
                               type="radio" 
@@ -984,436 +1074,39 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
           </div>
         );
       
-      default:
-        return (
-          <p className="text-muted-foreground text-sm p-4 bg-gray-50/50 rounded">
-            Basic editor not available for this component type. Use the template manager to modify complex components.
-          </p>
-        );
-    }
-  };
-  
-  const renderColorControls = () => {
-    if (!showColorControls) return null;
-    
-    // Don't show color controls for divider or spacer
-    if (item.type === 'divider' || item.type === 'spacer') return null;
-
-    // Define some preset gradient options
-    const gradientPresets = [
-      { name: 'None', value: 'none' },
-      { name: 'Blue Purple', value: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)' },
-      { name: 'Green Blue', value: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)' },
-      { name: 'Orange Red', value: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)' },
-      { name: 'Sky Blue', value: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)' },
-      { name: 'Pink Red', value: 'linear-gradient(135deg, #ec4899 0%, #b91c1c 100%)' },
-    ];
-
-    return (
-      <div className="space-y-3 mt-3 border-t pt-3">
-        <h4 className="text-sm font-medium mb-2">Styling Options</h4>
-
-        <Tabs defaultValue="background" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="background">Background</TabsTrigger>
-            <TabsTrigger value="text">Text</TabsTrigger>
-            <TabsTrigger value="border">Border</TabsTrigger>
-          </TabsList>
-          
-          <div className="pt-2">
-            {/* Background Tab */}
-            <TabsContent value="background" className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="bg-color" className="text-xs">Background Color:</Label>
-                  <div className="flex">
-                    <div 
-                      className="w-6 h-6 rounded-md mr-1 border"
-                      style={{ 
-                        backgroundColor: item.style?.backgroundColor || '#ffffff',
-                        opacity: item.style?.backgroundOpacity || 1
-                      }}
-                    />
-                    <Input
-                      id="bg-color"
-                      type="color"
-                      value={item.style?.backgroundColor || '#ffffff'}
-                      onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
-                      className="h-6 w-6 p-0 border-0"
-                    />
-                    <Input
-                      type="text"
-                      value={item.style?.backgroundColor || '#ffffff'}
-                      onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
-                      className="h-6 w-20 text-xs ml-1"
-                      placeholder="#ffffff"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="bg-gradient" className="text-xs">Background Gradient:</Label>
-                  <div className="flex gap-2">
-                    <div 
-                      className="w-6 h-20 rounded-md border"
-                      style={{ 
-                        backgroundImage: item.style?.backgroundGradient || 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}
-                    />
-                    <select
-                      id="bg-gradient"
-                      value={item.style?.backgroundGradient || 'none'}
-                      onChange={(e) => handleStyleChange('backgroundGradient', e.target.value)}
-                      className="w-full h-7 text-xs rounded-md border border-input"
-                    >
-                      {gradientPresets.map(preset => (
-                        <option key={preset.name} value={preset.value}>{preset.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="bg-image" className="text-xs">Background Image URL:</Label>
-                  <Input
-                    id="bg-image"
-                    type="text"
-                    value={item.style?.backgroundImage || ''}
-                    onChange={(e) => handleStyleChange('backgroundImage', e.target.value)}
-                    className="h-7 text-xs"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <Label htmlFor="bg-opacity" className="text-xs">Opacity:</Label>
-                    <span className="text-xs">{item.style?.backgroundOpacity || 1}</span>
-                  </div>
-                  <Input
-                    id="bg-opacity"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={item.style?.backgroundOpacity || 1}
-                    onChange={(e) => handleStyleChange('backgroundOpacity', e.target.value)}
-                    className="h-7"
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="padding" className="text-xs">Padding:</Label>
-                  <Input
-                    id="padding"
-                    type="text"
-                    value={item.style?.padding || ''}
-                    onChange={(e) => handleStyleChange('padding', e.target.value)}
-                    className="h-7 text-xs"
-                    placeholder="16px or 10px 20px"
-                  />
-                </div>
-              </div>
-            </TabsContent>
-            
-            {/* Text Tab */}
-            <TabsContent value="text" className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="text-color" className="text-xs">Text Color:</Label>
-                  <div className="flex">
-                    <div 
-                      className="w-6 h-6 rounded-md mr-1 border flex items-center justify-center"
-                      style={{ backgroundColor: '#f8f9fa' }}
-                    >
-                      <span style={{ color: item.style?.textColor || '#333333', fontSize: '10px', fontWeight: 'bold' }}>T</span>
-                    </div>
-                    <Input
-                      id="text-color"
-                      type="color"
-                      value={item.style?.textColor || '#333333'}
-                      onChange={(e) => handleStyleChange('textColor', e.target.value)}
-                      className="h-6 w-6 p-0 border-0"
-                    />
-                    <Input
-                      type="text"
-                      value={item.style?.textColor || '#333333'}
-                      onChange={(e) => handleStyleChange('textColor', e.target.value)}
-                      className="h-6 w-20 text-xs ml-1"
-                      placeholder="#333333"
-                    />
-                  </div>
-                </div>
-                
-                {/* Only show button color options for certain component types */}
-                {(item.type === 'button' || item.type === 'featured-article' || item.type === 'article-grid' || item.type === 'footer') && (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="button-color" className="text-xs">Button/Link Color:</Label>
-                      <div className="flex">
-                        <div 
-                          className="w-6 h-6 rounded-md mr-1 border"
-                          style={{ backgroundColor: item.style?.buttonColor || '#8b5cf6' }}
-                        />
-                        <Input
-                          id="button-color"
-                          type="color"
-                          value={item.style?.buttonColor || '#8b5cf6'}
-                          onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
-                          className="h-6 w-6 p-0 border-0"
-                        />
-                        <Input
-                          type="text"
-                          value={item.style?.buttonColor || '#8b5cf6'}
-                          onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
-                          className="h-6 w-20 text-xs ml-1"
-                          placeholder="#8b5cf6"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="button-text-color" className="text-xs">Button Text Color:</Label>
-                      <div className="flex">
-                        <div 
-                          className="w-6 h-6 rounded-md mr-1 border flex items-center justify-center"
-                          style={{ backgroundColor: item.style?.buttonColor || '#8b5cf6' }}
-                        >
-                          <span style={{ color: item.style?.buttonTextColor || '#ffffff', fontSize: '10px', fontWeight: 'bold' }}>T</span>
-                        </div>
-                        <Input
-                          id="button-text-color"
-                          type="color"
-                          value={item.style?.buttonTextColor || '#ffffff'}
-                          onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
-                          className="h-6 w-6 p-0 border-0"
-                        />
-                        <Input
-                          type="text"
-                          value={item.style?.buttonTextColor || '#ffffff'}
-                          onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
-                          className="h-6 w-20 text-xs ml-1"
-                          placeholder="#ffffff"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </TabsContent>
-            
-            {/* Border Tab */}
-            <TabsContent value="border" className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="border-color" className="text-xs">Border Color:</Label>
-                  <div className="flex">
-                    <div 
-                      className="w-6 h-6 rounded-md mr-1"
-                      style={{ 
-                        border: `2px solid ${item.style?.borderColor || '#e5e7eb'}`,
-                        backgroundColor: 'transparent'
-                      }}
-                    />
-                    <Input
-                      id="border-color"
-                      type="color"
-                      value={item.style?.borderColor || '#e5e7eb'}
-                      onChange={(e) => handleStyleChange('borderColor', e.target.value)}
-                      className="h-6 w-6 p-0 border-0"
-                    />
-                    <Input
-                      type="text"
-                      value={item.style?.borderColor || '#e5e7eb'}
-                      onChange={(e) => handleStyleChange('borderColor', e.target.value)}
-                      className="h-6 w-20 text-xs ml-1"
-                      placeholder="#e5e7eb"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="border-width" className="text-xs">Border Width:</Label>
-                  <Input
-                    id="border-width"
-                    type="text"
-                    value={item.style?.borderWidth || ''}
-                    onChange={(e) => handleStyleChange('borderWidth', e.target.value)}
-                    className="h-7 text-xs"
-                    placeholder="1px"
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="border-radius" className="text-xs">Border Radius:</Label>
-                  <Input
-                    id="border-radius"
-                    type="text"
-                    value={item.style?.borderRadius || ''}
-                    onChange={(e) => handleStyleChange('borderRadius', e.target.value)}
-                    className="h-7 text-xs"
-                    placeholder="4px"
-                  />
-                </div>
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
-    );
-  };
-  
-  // Get the icon and title based on the item type
-  const getItemTypeDetails = () => {
-    const icons: Record<string, JSX.Element> = {
-      header: <span className="h-4 w-4 flex items-center justify-center">🔝</span>,
-      heading: <span className="text-lg font-bold">T</span>,
-      paragraph: <span className="text-base">¶</span>,
-      image: <span className="h-4 w-4 flex items-center justify-center">🖼️</span>,
-      button: <span className="h-4 w-4 flex items-center justify-center">🔘</span>,
-      divider: <span className="h-4 w-4 flex items-center justify-center">⎯</span>,
-      spacer: <span className="h-4 w-4 flex items-center justify-center">↕️</span>,
-      compartment: <span className="h-4 w-4 flex items-center justify-center">📦</span>,
-      'featured-article': <span className="h-4 w-4 flex items-center justify-center">📰</span>,
-      'article-grid': <span className="h-4 w-4 flex items-center justify-center">📑</span>,
-      'cta-banner': <span className="h-4 w-4 flex items-center justify-center">📢</span>,
-      'testimonial': <span className="h-4 w-4 flex items-center justify-center">💬</span>,
-      'event-calendar': <span className="h-4 w-4 flex items-center justify-center">📅</span>,
-      'quiz': <span className="h-4 w-4 flex items-center justify-center">❓</span>,
-      'product-recommendation': <span className="h-4 w-4 flex items-center justify-center">🛍️</span>,
-      'subscribe-now': <span className="h-4 w-4 flex items-center justify-center">✉️</span>,
-      footer: <span className="h-4 w-4 flex items-center justify-center">🔄</span>,
-    };
-    
-    const titles: Record<string, string> = {
-      header: 'Header',
-      heading: 'Heading',
-      paragraph: 'Paragraph',
-      image: 'Image',
-      button: 'Button',
-      divider: 'Divider',
-      spacer: 'Spacer',
-      compartment: 'Compartment',
-      'featured-article': 'Featured Article',
-      'article-grid': 'Article Grid',
-      'cta-banner': 'Call to Action Banner',
-      'testimonial': 'Testimonial',
-      'event-calendar': 'Event Calendar',
-      'quiz': 'Quiz',
-      'product-recommendation': 'Product Showcase',
-      'subscribe-now': 'Subscribe Form',
-      footer: 'Footer',
-    };
-    
-    return {
-      icon: icons[item.type] || <span className="h-4 w-4 flex items-center justify-center">📄</span>,
-      title: titles[item.type] || 'Unknown',
-    };
-  };
-  
-  const { icon, title } = getItemTypeDetails();
-  
-  // Render the content form based on item type
-  const renderContentForm = () => {
-    switch (item.type) {
-      case 'featured-article':
+      case 'product-recommendation':
         return (
           <div className="space-y-4">
-            <div>
-              <Label>Title</Label>
-              <Input
-                value={item.content.title || ''}
-                onChange={(e) => handleContentChange('title', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Author</Label>
-              <Input
-                value={item.content.author || ''}
-                onChange={(e) => handleContentChange('author', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Date</Label>
-              <Input
-                value={item.content.date || ''}
-                onChange={(e) => handleContentChange('date', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Image URL</Label>
-              <Input
-                value={item.content.image || ''}
-                onChange={(e) => handleContentChange('image', e.target.value)}
-                className="mt-1"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-            <div>
-              <Label>Excerpt</Label>
-              <Textarea
-                value={item.content.excerpt || ''}
-                onChange={(e) => handleContentChange('excerpt', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Link URL</Label>
-              <Input
-                value={item.content.linkUrl || ''}
-                onChange={(e) => handleContentChange('linkUrl', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>CTA Text</Label>
-              <Input
-                value={item.content.cta || 'Read More'}
-                onChange={(e) => handleContentChange('cta', e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </div>
-        );
-
-      case 'article-grid':
-        return (
-          <div className="space-y-4">
-            {!item.content.articles || item.content.articles.length === 0 ? (
+            {!item.content.products || item.content.products.length === 0 ? (
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => handleContentChange('articles', [
+                onClick={() => handleContentChange('products', [
                   {
-                    title: 'Article Title',
-                    author: 'Author Name',
+                    name: 'Product Name',
                     image: 'https://placehold.co/400x300',
-                    excerpt: 'Article excerpt goes here.',
-                    linkUrl: '#',
-                    linkText: 'Read More'
+                    price: '$99.99',
+                    discount: '$79.99',
+                    description: 'Product description goes here.',
+                    link: '#'
                   }
                 ])}
               >
-                Add Article
+                Add Product
               </Button>
             ) : (
               <>
-                {(item.content.articles as Array<any>).map((article, index) => (
+                {(item.content.products || []).map((product: Product, index: number) => (
                   <Card key={index} className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-sm font-medium">Article {index + 1}</h4>
+                      <h4 className="text-sm font-medium">Product {index + 1}</h4>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          const newArticles = [...(item.content.articles || [])];
-                          newArticles.splice(index, 1);
-                          handleContentChange('articles', newArticles);
+                          const newProducts = [...(item.content.products || [])];
+                          newProducts.splice(index, 1);
+                          handleContentChange('products', newProducts);
                         }}
                       >
                         <X className="h-4 w-4" />
@@ -1421,25 +1114,13 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <Label>Title</Label>
+                        <Label>Product Name</Label>
                         <Input
-                          value={article.title || ''}
+                          value={product.name || ''}
                           onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], title: e.target.value };
-                            handleContentChange('articles', newArticles);
-                          }}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label>Author</Label>
-                        <Input
-                          value={article.author || ''}
-                          onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], author: e.target.value };
-                            handleContentChange('articles', newArticles);
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], name: e.target.value };
+                            handleContentChange('products', newProducts);
                           }}
                           className="mt-1"
                         />
@@ -1447,48 +1128,60 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                       <div>
                         <Label>Image URL</Label>
                         <Input
-                          value={article.image || ''}
+                          value={product.image || ''}
                           onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], image: e.target.value };
-                            handleContentChange('articles', newArticles);
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], image: e.target.value };
+                            handleContentChange('products', newProducts);
                           }}
                           className="mt-1"
                           placeholder="https://example.com/image.jpg"
                         />
                       </div>
                       <div>
-                        <Label>Excerpt</Label>
+                        <Label>Price</Label>
+                        <Input
+                          value={product.price || ''}
+                          onChange={(e) => {
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], price: e.target.value };
+                            handleContentChange('products', newProducts);
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Discount Price (Optional)</Label>
+                        <Input
+                          value={product.discount || ''}
+                          onChange={(e) => {
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], discount: e.target.value };
+                            handleContentChange('products', newProducts);
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
                         <Textarea
-                          value={article.excerpt || ''}
+                          value={product.description || ''}
                           onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], excerpt: e.target.value };
-                            handleContentChange('articles', newArticles);
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], description: e.target.value };
+                            handleContentChange('products', newProducts);
                           }}
                           className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label>Link URL</Label>
+                        <Label>Product Link</Label>
                         <Input
-                          value={article.linkUrl || ''}
+                          value={product.link || ''}
                           onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], linkUrl: e.target.value };
-                            handleContentChange('articles', newArticles);
-                          }}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label>Link Text</Label>
-                        <Input
-                          value={article.linkText || 'Read More'}
-                          onChange={(e) => {
-                            const newArticles = [...(item.content.articles || [])];
-                            newArticles[index] = { ...newArticles[index], linkText: e.target.value };
-                            handleContentChange('articles', newArticles);
+                            const newProducts = [...(item.content.products || [])];
+                            newProducts[index] = { ...newProducts[index], link: e.target.value };
+                            handleContentChange('products', newProducts);
                           }}
                           className="mt-1"
                         />
@@ -1500,19 +1193,19 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    const newArticles = [...(item.content.articles || [])];
-                    newArticles.push({
-                      title: 'New Article',
-                      author: 'Author Name',
+                    const newProducts = [...(item.content.products || [])];
+                    newProducts.push({
+                      name: 'New Product',
                       image: 'https://placehold.co/400x300',
-                      excerpt: 'Article excerpt goes here.',
-                      linkUrl: '#',
-                      linkText: 'Read More'
+                      price: '$99.99',
+                      discount: '$79.99',
+                      description: 'Product description goes here.',
+                      link: '#'
                     });
-                    handleContentChange('articles', newArticles);
+                    handleContentChange('products', newProducts);
                   }}
                 >
-                  Add Another Article
+                  Add Another Product
                 </Button>
               </>
             )}
@@ -1524,11 +1217,10 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
           <p className="text-muted-foreground text-sm p-4 bg-gray-50/50 rounded">
             Basic editor not available for this component type. Use the template manager to modify complex components.
           </p>
-      );
+        );
     }
   };
   
-  // Add border to show selection state
   const getItemContainerStyle = () => {
     return {
       border: isSelected ? '2px solid #8b5cf6' : '1px solid #e2e8f0',
@@ -1540,127 +1232,336 @@ const SortableNewsletterItem: React.FC<SortableNewsletterItemProps> = ({
   return (
     <div
       ref={setNodeRef}
-      style={{ ...style, ...getItemContainerStyle() }}
+      style={style}
       className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow mb-4 overflow-hidden",
-        isDragging ? "opacity-50" : "",
-        isEditing ? "ring-2 ring-primary" : "",
-        isSelected ? "ring-2 ring-blue-500" : ""
+        "relative bg-white rounded-lg border shadow-sm",
+        isDragging && "shadow-lg",
+        isEditing && "ring-2 ring-primary"
       )}
-      onClick={(e) => {
-        // Only handle click if not dragging and not in editing mode
-        if (!isDragging && !isEditing && onSelect) {
-          e.stopPropagation();
-          onSelect(item.id);
-          
-          // Add a slight delay to ensure the styles panel is mounted
-          setTimeout(() => {
-            // Try to focus on the color panel
-            const colorPanel = document.getElementById('component-color-panel');
-            if (colorPanel) {
-              colorPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 100);
-        }
-      }}
     >
-      <div
-        className="bg-muted px-3 py-2 flex items-center justify-between border-b"
-      >
-        <div className="flex items-center space-x-2" {...attributes} {...listeners}>
-          <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-          <span className="text-sm font-medium capitalize">
-            {item.type.replace('-', ' ')}
-          </span>
+      <div className="flex items-center justify-between p-2 border-b">
+        <div className="flex items-center gap-2">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing"
+          >
+            <span className="text-gray-400">⋮⋮</span>
+          </button>
+          <span className="text-sm font-medium">{getItemTypeDetails().title}</span>
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={handleEditToggle}
             className="h-7 w-7"
           >
-            <Pencil className="h-4 w-4 text-muted-foreground" />
+            {isEditing ? <X className="h-4 w-4" /> : <span className="text-gray-400">✎</span>}
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={onDelete}
+            onClick={() => onDelete(item.id)}
             className="h-7 w-7"
           >
-            <Trash2 className="h-4 w-4 text-muted-foreground" />
+            <span className="text-gray-400">×</span>
           </Button>
-          <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-              >
-                {isExpanded ? 
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" /> : 
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                }
-              </Button>
-            </CollapsibleTrigger>
-          </Collapsible>
         </div>
       </div>
 
-      {/* Content preview */}
       <div className={`px-4 py-3 ${isEditing ? 'bg-gray-50/50' : ''}`}>
         {renderItemPreview()}
       </div>
-      
-      {/* Collapsed content */}
-      <Collapsible open={isExpanded && !isEditing}>
-        <CollapsibleContent>
-          <div className="border-t px-4 py-3 bg-gray-50">
-            {renderItemPreview()}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      {/* Editor */}
+
       {isEditing && (
         <div className="border-t">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full bg-gray-100 rounded-none px-4 h-10">
-              <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
-              {showColorControls && (
-                <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
-              )}
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="style">Style</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="content" className="p-4 space-y-4">
+            <TabsContent value="content" className="p-4">
               {renderContentForm()}
             </TabsContent>
-            
-            {showColorControls && (
-              <TabsContent value="style" className="p-4">
-                {renderColorControls()}
-              </TabsContent>
-            )}
+            <TabsContent value="style" className="p-4">
+              {renderColorControls()}
+            </TabsContent>
           </Tabs>
-          
-          <div className="flex justify-end p-3 bg-gray-50 border-t">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => setIsEditing(false)}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => setIsEditing(false)}
-            >
-              Save Changes
-            </Button>
-          </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const renderContentForm = () => {
+  switch (item.type) {
+    // ... existing cases ...
+  }
+};
+
+const renderColorControls = () => {
+  if (!showColorControls) return null;
+  
+  if (item.type === 'divider' || item.type === 'spacer') return null;
+
+  const gradientPresets = [
+    { name: 'None', value: 'none' },
+    { name: 'Blue Purple', value: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)' },
+    { name: 'Green Blue', value: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)' },
+    { name: 'Orange Red', value: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)' },
+    { name: 'Sky Blue', value: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)' },
+    { name: 'Pink Red', value: 'linear-gradient(135deg, #ec4899 0%, #b91c1c 100%)' },
+  ];
+
+  return (
+    <div className="space-y-3 mt-3 border-t pt-3">
+      <h4 className="text-sm font-medium mb-2">Styling Options</h4>
+
+      <Tabs defaultValue="background" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="background">Background</TabsTrigger>
+          <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsTrigger value="border">Border</TabsTrigger>
+        </TabsList>
+        
+        <div className="pt-2">
+          <TabsContent value="background" className="space-y-3">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="bg-color" className="text-xs">Background Color:</Label>
+                <div className="flex">
+                  <div 
+                    className="w-6 h-6 rounded-md mr-1 border"
+                    style={{ 
+                      backgroundColor: item.style?.backgroundColor || '#ffffff',
+                      opacity: item.style?.backgroundOpacity || 1
+                    }}
+                  />
+                  <Input
+                    id="bg-color"
+                    type="color"
+                    value={item.style?.backgroundColor || '#ffffff'}
+                    onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
+                    className="h-6 w-6 p-0 border-0"
+                  />
+                  <Input
+                    type="text"
+                    value={item.style?.backgroundColor || '#ffffff'}
+                    onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
+                    className="h-6 w-20 text-xs ml-1"
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="bg-gradient" className="text-xs">Background Gradient:</Label>
+                <div className="flex gap-2">
+                  <div 
+                    className="w-6 h-20 rounded-md border"
+                    style={{ 
+                      backgroundImage: item.style?.backgroundGradient || 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  />
+                  <select
+                    id="bg-gradient"
+                    value={item.style?.backgroundGradient || 'none'}
+                    onChange={(e) => handleStyleChange('backgroundGradient', e.target.value)}
+                    className="w-full h-7 text-xs rounded-md border border-input"
+                  >
+                    {gradientPresets.map(preset => (
+                      <option key={preset.name} value={preset.value}>{preset.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="bg-image" className="text-xs">Background Image URL:</Label>
+                <Input
+                  id="bg-image"
+                  type="text"
+                  value={item.style?.backgroundImage || ''}
+                  onChange={(e) => handleStyleChange('backgroundImage', e.target.value)}
+                  className="h-7 text-xs"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label htmlFor="bg-opacity" className="text-xs">Opacity:</Label>
+                  <span className="text-xs">{item.style?.backgroundOpacity || 1}</span>
+                </div>
+                <Input
+                  id="bg-opacity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={item.style?.backgroundOpacity || 1}
+                  onChange={(e) => handleStyleChange('backgroundOpacity', e.target.value)}
+                  className="h-7"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="padding" className="text-xs">Padding:</Label>
+                <Input
+                  id="padding"
+                  type="text"
+                  value={item.style?.padding || ''}
+                  onChange={(e) => handleStyleChange('padding', e.target.value)}
+                  className="h-7 text-xs"
+                  placeholder="16px or 10px 20px"
+                />
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="text" className="space-y-3">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="text-color" className="text-xs">Text Color:</Label>
+                <div className="flex">
+                  <div 
+                    className="w-6 h-6 rounded-md mr-1 border flex items-center justify-center"
+                    style={{ backgroundColor: '#f8f9fa' }}
+                  >
+                    <span style={{ color: item.style?.textColor || '#333333', fontSize: '10px', fontWeight: 'bold' }}>T</span>
+                  </div>
+                  <Input
+                    id="text-color"
+                    type="color"
+                    value={item.style?.textColor || '#333333'}
+                    onChange={(e) => handleStyleChange('textColor', e.target.value)}
+                    className="h-6 w-6 p-0 border-0"
+                  />
+                  <Input
+                    type="text"
+                    value={item.style?.textColor || '#333333'}
+                    onChange={(e) => handleStyleChange('textColor', e.target.value)}
+                    className="h-6 w-20 text-xs ml-1"
+                    placeholder="#333333"
+                  />
+                </div>
+              </div>
+              
+              {(item.type === 'button' || item.type === 'featured-article' || item.type === 'article-grid' || item.type === 'footer') && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="button-color" className="text-xs">Button/Link Color:</Label>
+                    <div className="flex">
+                      <div 
+                        className="w-6 h-6 rounded-md mr-1 border"
+                        style={{ backgroundColor: item.style?.buttonColor || '#8b5cf6' }}
+                      />
+                      <Input
+                        id="button-color"
+                        type="color"
+                        value={item.style?.buttonColor || '#8b5cf6'}
+                        onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
+                        className="h-6 w-6 p-0 border-0"
+                      />
+                      <Input
+                        type="text"
+                        value={item.style?.buttonColor || '#8b5cf6'}
+                        onChange={(e) => handleStyleChange('buttonColor', e.target.value)}
+                        className="h-6 w-20 text-xs ml-1"
+                        placeholder="#8b5cf6"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="button-text-color" className="text-xs">Button Text Color:</Label>
+                    <div className="flex">
+                      <div 
+                        className="w-6 h-6 rounded-md mr-1 border flex items-center justify-center"
+                        style={{ backgroundColor: item.style?.buttonColor || '#8b5cf6' }}
+                      >
+                        <span style={{ color: item.style?.buttonTextColor || '#ffffff', fontSize: '10px', fontWeight: 'bold' }}>T</span>
+                      </div>
+                      <Input
+                        id="button-text-color"
+                        type="color"
+                        value={item.style?.buttonTextColor || '#ffffff'}
+                        onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                        className="h-6 w-6 p-0 border-0"
+                      />
+                      <Input
+                        type="text"
+                        value={item.style?.buttonTextColor || '#ffffff'}
+                        onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                        className="h-6 w-20 text-xs ml-1"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="border" className="space-y-3">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="border-color" className="text-xs">Border Color:</Label>
+                <div className="flex">
+                  <div 
+                    className="w-6 h-6 rounded-md mr-1"
+                    style={{ 
+                      border: `2px solid ${item.style?.borderColor || '#e5e7eb'}`,
+                      backgroundColor: 'transparent'
+                    }}
+                  />
+                  <Input
+                    id="border-color"
+                    type="color"
+                    value={item.style?.borderColor || '#e5e7eb'}
+                    onChange={(e) => handleStyleChange('borderColor', e.target.value)}
+                    className="h-6 w-6 p-0 border-0"
+                  />
+                  <Input
+                    type="text"
+                    value={item.style?.borderColor || '#e5e7eb'}
+                    onChange={(e) => handleStyleChange('borderColor', e.target.value)}
+                    className="h-6 w-20 text-xs ml-1"
+                    placeholder="#e5e7eb"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="border-width" className="text-xs">Border Width:</Label>
+                <Input
+                  id="border-width"
+                  type="text"
+                  value={item.style?.borderWidth || ''}
+                  onChange={(e) => handleStyleChange('borderWidth', e.target.value)}
+                  className="h-7 text-xs"
+                  placeholder="1px"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="border-radius" className="text-xs">Border Radius:</Label>
+                <Input
+                  id="border-radius"
+                  type="text"
+                  value={item.style?.borderRadius || ''}
+                  onChange={(e) => handleStyleChange('borderRadius', e.target.value)}
+                  className="h-7 text-xs"
+                  placeholder="4px"
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 };
