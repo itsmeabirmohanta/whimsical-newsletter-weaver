@@ -1,69 +1,80 @@
-# Welcome to your Lovable project
+# FSL Newsletter Builder
 
-## Project info
+A modern, flexible newsletter builder for creating beautiful email newsletters. Built with React, TypeScript, and Tailwind CSS.
 
-**URL**: https://lovable.dev/projects/475f8028-c70d-4d4f-98f9-d273c126e1c2
+## Features
 
-## How can I edit this code?
+- 🎨 Drag-and-drop interface for easy newsletter composition
+- 📱 Responsive design for all email clients
+- 🎯 Multiple content types:
+  - Featured Articles
+  - Article Grids
+  - Interactive Quizzes
+  - Event Calendars
+  - Testimonials
+  - Call-to-Action Banners
+  - Subscribe Forms
+  - Headers and Footers
+- 🎭 Customizable styling for each component
+- 📧 Email-client compatible HTML output
+- 🔄 Real-time preview
+- 💾 Save and load newsletter templates
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/475f8028-c70d-4d4f-98f9-d273c126e1c2) and start prompting.
+- Node.js (v14 or higher)
+- npm or yarn
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/fsl-news-letter.git
+cd fsl-news-letter
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Usage
 
-## What technologies are used for this project?
+1. Start by clicking "Create New Newsletter" or loading an existing template
+2. Drag components from the sidebar into your newsletter
+3. Edit component content and styling using the built-in editors
+4. Preview your newsletter in real-time
+5. Generate and send your newsletter when ready
 
-This project is built with .
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## How can I deploy this project?
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Simply open [Lovable](https://lovable.dev/projects/475f8028-c70d-4d4f-98f9-d273c126e1c2) and click on Share -> Publish.
+## License
 
-## I want to use a custom domain - is that possible?
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Drag and drop powered by [dnd kit](https://dndkit.com/) 
