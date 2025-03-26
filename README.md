@@ -1,24 +1,21 @@
 # FSL Newsletter Builder
 
-A modern, flexible newsletter builder for creating beautiful email newsletters. Built with React, TypeScript, and Tailwind CSS.
+A modern, intuitive newsletter builder that helps you create beautiful email newsletters with ease. Built with React, TypeScript, and TailwindCSS.
 
 ## Features
 
-- 🎨 Drag-and-drop interface for easy newsletter composition
-- 📱 Responsive design for all email clients
-- 🎯 Multiple content types:
-  - Featured Articles
-  - Article Grids
-  - Interactive Quizzes
-  - Event Calendars
-  - Testimonials
-  - Call-to-Action Banners
-  - Subscribe Forms
-  - Headers and Footers
-- 🎭 Customizable styling for each component
-- 📧 Email-client compatible HTML output
-- 🔄 Real-time preview
-- 💾 Save and load newsletter templates
+- 🎨 Drag-and-drop interface for easy content arrangement
+- 📱 Responsive design for all devices
+- 🎯 Multiple content blocks:
+  - Basic blocks (Header, Text, Image, Button)
+  - Interactive blocks (Quiz, Events, Social Media)
+  - Marketing blocks (Subscribe Form, Featured Article, Article Grid)
+  - Layout blocks (Divider, Spacer, Footer)
+- 💾 Auto-save functionality
+- 📝 Real-time preview
+- 📤 Export to HTML
+- 🔄 Undo/Redo functionality
+- 🎨 Customizable styles and themes
 
 ## Getting Started
 
@@ -30,51 +27,14 @@ A modern, flexible newsletter builder for creating beautiful email newsletters. 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/fsl-news-letter.git
-cd fsl-news-letter
-```
+   ```bash
+   git clone https://github.com/yourusername/fsl-newsletter-builder.git
+   cd fsl-newsletter-builder
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Usage
-
-1. Start by clicking "Create New Newsletter" or loading an existing template
-2. Drag components from the sidebar into your newsletter
-3. Edit component content and styling using the built-in editors
-4. Preview your newsletter in real-time
-5. Generate and send your newsletter when ready
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Drag and drop powered by [dnd kit](https://dndkit.com/) 
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```

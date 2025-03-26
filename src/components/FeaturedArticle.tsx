@@ -1,94 +1,114 @@
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ColorPicker } from '@/components/ui/color-picker';
 
-import { useRef, useEffect } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
-import { ExternalLink, Calendar } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-
-interface FeaturedArticleProps {
+export interface FeaturedArticleData {
+  image?: string;
   title: string;
-  excerpt: string;
-  imageUrl: string;
-  date: string;
-  readTime: string;
-  articleUrl: string;
+  summary: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
 }
 
-const FeaturedArticle = ({
-  title,
-  excerpt,
-  imageUrl,
-  date,
-  readTime,
-  articleUrl,
-}: FeaturedArticleProps) => {
-  const controls = useAnimation();
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-  
-  useEffect(() => {
-    if (isInView) {
-      controls.start('visible');
-    }
-  }, [controls, isInView]);
-  
-  const variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1.0] }
-    }
+interface FeaturedArticleProps {
+  data: FeaturedArticleData;
+  onChange: (data: FeaturedArticleData) => void;
+}
+
+export function FeaturedArticle({ data, onChange }: FeaturedArticleProps) {
+  const handleChange = (field: keyof FeaturedArticleData, value: string) => {
+    onChange({ ...data, [field]: value });
   };
 
   return (
-    <motion.div
-      ref={ref}
-      variants={variants}
-      initial="hidden"
-      animate={controls}
-      className="my-12 md:my-20"
-    >
-      <Card className="overflow-hidden elegant-shadow hover:shadow-lg transition-shadow duration-300 border-0">
-        <div className="flex flex-col lg:flex-row">
-          <div className="w-full lg:w-7/12 overflow-hidden">
-            <div 
-              className="h-64 md:h-80 lg:h-full w-full bg-cover bg-center content-image"
-              style={{ backgroundImage: `url(${imageUrl})` }}
-            />
-          </div>
-          
-          <CardContent className="w-full lg:w-5/12 p-6 md:p-8 lg:p-10 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center text-sm text-muted-foreground mb-4">
-                <Calendar size={14} className="mr-1" />
-                <span>{date}</span>
-                <span className="mx-2">•</span>
-                <span>{readTime} read</span>
-              </div>
-              
-              <h2 className="text-2xl md:text-3xl font-medium mb-4 text-balance">
-                {title}
-              </h2>
-              
-              <p className="text-muted-foreground">
-                {excerpt}
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <a
-                href={articleUrl}
-                className="inline-flex items-center group text-primary font-medium"
-              >
-                Continue reading
-                <ExternalLink size={16} className="ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-              </a>
-            </div>
-          </CardContent>
-        </div>
-      </Card>
-    </motion.div>
-  );
-};
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="image">Image URL</Label>
+        <Input
+          id="image"
+          value={data.image || ''}
+          onChange={(e) => handleChange('image', e.target.value)}
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
 
-export default FeaturedArticle;
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={data.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          placeholder="Article Title"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="summary">Summary</Label>
+        <Textarea
+          id="summary"
+          value={data.summary}
+          onChange={(e) => handleChange('summary', e.target.value)}
+          placeholder="Write a compelling summary..."
+          rows={4}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="buttonText">Button Text</Label>
+        <Input
+          id="buttonText"
+          value={data.buttonText || ''}
+          onChange={(e) => handleChange('buttonText', e.target.value)}
+          placeholder="Read More"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="buttonUrl">Button URL</Label>
+        <Input
+          id="buttonUrl"
+          value={data.buttonUrl || ''}
+          onChange={(e) => handleChange('buttonUrl', e.target.value)}
+          placeholder="https://example.com/article"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Background Color</Label>
+          <ColorPicker
+            color={data.backgroundColor || '#ffffff'}
+            onChange={(color) => handleChange('backgroundColor', color)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Text Color</Label>
+          <ColorPicker
+            color={data.textColor || '#000000'}
+            onChange={(color) => handleChange('textColor', color)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Button Color</Label>
+          <ColorPicker
+            color={data.buttonColor || '#007bff'}
+            onChange={(color) => handleChange('buttonColor', color)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Button Text Color</Label>
+          <ColorPicker
+            color={data.buttonTextColor || '#ffffff'}
+            onChange={(color) => handleChange('buttonTextColor', color)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+} 

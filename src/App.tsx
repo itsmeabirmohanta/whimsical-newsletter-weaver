@@ -1,15 +1,15 @@
-import React, { useEffect } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
+import { Toaster } from "./components/ui/toaster";
+import { Toaster as Sonner } from "./components/ui/sonner";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { LazyMotion, domAnimation } from "framer-motion";
-import NotFound from "./pages/NotFound";
-import EmailNewsletterTemplate from "./components/EmailNewsletterTemplate";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./components/ui/theme-provider";
 import NewsletterBuilder from "./pages/NewsletterBuilder";
+import NewsletterPreview from "./pages/NewsletterPreview";
+import NotFound from "./pages/NotFound";
 
-// Create a client
+// Create a React Query client
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -26,27 +26,23 @@ const App = () => {
   }, []);
   
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <LazyMotion features={domAnimation}>
-          <TooltipProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="whimsical-theme">
+        <TooltipProvider>
+          <div className="min-h-screen bg-background text-foreground">
+            <Routes>
+              <Route path="/" element={<Navigate to="/newsletter-builder" replace />} />
+              <Route path="/newsletter-builder" element={<NewsletterBuilder />} />
+              <Route path="/newsletter-preview" element={<NewsletterPreview />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
             <Toaster />
             <Sonner />
-            <div className="min-h-screen bg-background text-foreground">
-              <Router>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/newsletter-builder" replace />} />
-                  <Route path="/newsletter-builder" element={<NewsletterBuilder />} />
-                  <Route path="/newsletter-preview" element={<EmailNewsletterTemplate />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Router>
-            </div>
-          </TooltipProvider>
-        </LazyMotion>
-      </QueryClientProvider>
-    </React.StrictMode>
+          </div>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
-export default App;
+export default App; 

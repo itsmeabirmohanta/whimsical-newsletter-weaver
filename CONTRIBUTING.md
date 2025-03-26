@@ -1,49 +1,96 @@
 # Contributing to FSL Newsletter Builder
 
-We love your input! We want to make contributing to FSL Newsletter Builder as easy and transparent as possible, whether it's:
+First off, thank you for considering contributing to FSL Newsletter Builder! It's people like you that make it such a great tool.
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
-- Becoming a maintainer
+## Code of Conduct
 
-## We Develop with Github
-We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code.
 
-## We Use [Github Flow](https://guides.github.com/introduction/flow/index.html)
-Pull requests are the best way to propose changes to the codebase. We actively welcome your pull requests:
+## How Can I Contribute?
 
-1. Fork the repo and create your branch from `main`.
-2. If you've added code that should be tested, add tests.
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes.
-5. Make sure your code lints.
-6. Issue that pull request!
+### Reporting Bugs
 
-## Any contributions you make will be under the MIT Software License
-In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
+Before creating bug reports, please check the issue list as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
 
-## Report bugs using Github's [issue tracker](https://github.com/yourusername/fsl-news-letter/issues)
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/yourusername/fsl-news-letter/issues/new); it's that easy!
+* Use a clear and descriptive title
+* Describe the exact steps which reproduce the problem
+* Provide specific examples to demonstrate the steps
+* Describe the behavior you observed after following the steps
+* Explain which behavior you expected to see instead and why
+* Include screenshots if possible
 
-## Write bug reports with detail, background, and sample code
+### Suggesting Enhancements
 
-**Great Bug Reports** tend to have:
+Enhancement suggestions are tracked as GitHub issues. When you are creating an enhancement suggestion, please include:
 
-- A quick summary and/or background
-- Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
-- What you expected would happen
-- What actually happens
-- Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
+* Use a clear and descriptive title
+* Provide a step-by-step description of the suggested enhancement
+* Provide specific examples to demonstrate the steps
+* Describe the current behavior and explain which behavior you expected to see instead
+* Explain why this enhancement would be useful
+* List some other applications where this enhancement exists, if applicable
 
-## Use a Consistent Coding Style
+### Pull Requests
 
-* Use TypeScript for type safety
-* 2 spaces for indentation rather than tabs
-* You can try running `npm run lint` for style unification
+* Fill in the required template
+* Do not include issue numbers in the PR title
+* Include screenshots and animated GIFs in your pull request whenever possible
+* Follow the TypeScript and React styleguides
+* End files with a newline
+* Avoid platform-dependent code
 
-## License
-By contributing, you agree that your contributions will be licensed under its MIT License. 
+## Development Process
+
+1. Fork the repository
+2. Create a new branch for your feature
+3. Make your changes
+4. Write or adapt tests as needed
+5. Update documentation as needed
+6. Submit a pull request
+
+### Setup Development Environment
+
+```bash
+# Clone your fork
+git clone https://github.com/<your-username>/fsl-newsletter-builder.git
+
+# Add upstream remote
+git remote add upstream https://github.com/original-owner/fsl-newsletter-builder.git
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### Code Style
+
+* Use TypeScript
+* Follow the existing code style
+* Use meaningful variable and function names
+* Comment your code when necessary
+* Write tests for new features
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- path/to/test-file.test.ts
+```
+
+## Documentation
+
+* Keep README.md up to date
+* Document new features
+* Update JSDoc comments for new functions and components
+* Update type definitions
+
+## Questions?
+
+Feel free to open an issue with your question or contact the maintainers directly.
+
+Thank you for your contributions! 🎉 

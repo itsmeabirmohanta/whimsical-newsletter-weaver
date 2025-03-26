@@ -23,8 +23,8 @@ if (!fs.existsSync(configPath)) {
   fs.writeFileSync(configPath, JSON.stringify({
     emailService: {
       gmail: {
-        user: '',
-        pass: ''
+        user: 'www.mohontoabir@gmail.com',
+        pass: 'cxxg uclu rkmw vflz'
       }
     }
   }, null, 2));
@@ -50,8 +50,8 @@ try {
   config = {
     emailService: {
       gmail: {
-        user: '',
-        pass: ''
+        user: 'www.mohontoabir@gmail.com',
+        pass: 'cxxg uclu rkmw vflz'
       }
     }
   };
@@ -197,6 +197,141 @@ app.post('/api/send-email', async (req, res) => {
   }
 });
 
+// Template storage
+const templatesPath = join(__dirname, 'templates');
+if (!fs.existsSync(templatesPath)) {
+  fs.mkdirSync(templatesPath);
+  console.log('Created templates directory');
+}
+
+// Save template endpoint
+app.post('/api/templates', (req, res) => {
+  try {
+    const { name, content } = req.body;
+    
+    if (!name || !content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Template name and content are required'
+      });
+    }
+    
+    const filename = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+    const templatePath = join(templatesPath, filename);
+    
+    fs.writeFileSync(templatePath, JSON.stringify({
+      name,
+      content,
+      createdAt: new Date().toISOString()
+    }, null, 2));
+    
+    res.json({
+      success: true,
+      message: 'Template saved successfully',
+      filename
+    });
+  } catch (error) {
+    console.error('Error saving template:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save template'
+    });
+  }
+});
+
+// Get all templates
+app.get('/api/templates', (req, res) => {
+  try {
+    const templates = [];
+    
+    if (fs.existsSync(templatesPath)) {
+      const files = fs.readdirSync(templatesPath);
+      
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          const templatePath = join(templatesPath, file);
+          const data = fs.readFileSync(templatePath, 'utf8');
+          const template = JSON.parse(data);
+          
+          templates.push({
+            id: file.replace('.json', ''),
+            name: template.name,
+            createdAt: template.createdAt
+          });
+        }
+      }
+    }
+    
+    res.json({
+      success: true,
+      templates
+    });
+  } catch (error) {
+    console.error('Error getting templates:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get templates'
+    });
+  }
+});
+
+// Get template by ID
+app.get('/api/templates/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const templatePath = join(templatesPath, `${id}.json`);
+    
+    if (!fs.existsSync(templatePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Template not found'
+      });
+    }
+    
+    const data = fs.readFileSync(templatePath, 'utf8');
+    const template = JSON.parse(data);
+    
+    res.json({
+      success: true,
+      template
+    });
+  } catch (error) {
+    console.error('Error getting template:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get template'
+    });
+  }
+});
+
+// Delete template
+app.delete('/api/templates/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const templatePath = join(templatesPath, `${id}.json`);
+    
+    if (!fs.existsSync(templatePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Template not found'
+      });
+    }
+    
+    fs.unlinkSync(templatePath);
+    
+    res.json({
+      success: true,
+      message: 'Template deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete template'
+    });
+  }
+});
+
 // Status endpoint
 app.get('/api/status', (req, res) => {
   const isConfigured = !!(config.emailService?.gmail?.user && config.emailService?.gmail?.pass);
@@ -234,5 +369,6 @@ app.listen(PORT, () => {
 🚀 Server running on port ${PORT}
 📧 Email API available at http://localhost:${PORT}/api/send-email
 📊 Status endpoint at http://localhost:${PORT}/api/status
+📁 Templates API at http://localhost:${PORT}/api/templates
   `);
-});
+}); 
